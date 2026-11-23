@@ -65,7 +65,7 @@ export default function InTransitPanel() {
           <p className="text-xs text-muted-foreground mb-2">
             {t('inTransit.summary', { count: rows.length, amount: formatCurrency(total) })}
           </p>
-          <div className="grid gap-2 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {rows.map((r) => {
               const days = differenceInCalendarDays(new Date(), new Date(r.date));
               const isOrder = r.names.length > 1;
@@ -82,7 +82,7 @@ export default function InTransitPanel() {
                         {isOrder ? t('inTransit.order', { count: r.names.length }) : r.names[0]}
                       </p>
                       {isOrder && <p className="text-xs text-muted-foreground truncate">{r.names.join(', ')}</p>}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {t('inTransit.line', { qty: r.qty, days: t('inTransit.days', { count: days }) })}
                         {r.tracking ? ` · ${r.tracking}` : ''}
                       </p>
