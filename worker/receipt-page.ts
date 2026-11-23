@@ -29,7 +29,7 @@ export const BRAND_SITE = 'https://sdtechsystems.dev';
 export const esc = (s: unknown) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-const money = (n: number) =>
+export const money = (n: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n || 0);
 
 export function formatReceiptDate(iso: string): string {
@@ -53,7 +53,7 @@ export function whatsappNumber(phone?: string): string | null {
   return null;
 }
 
-const CSS = `
+export const CSS = `
 @font-face{font-family:"SD Sans";src:url(/recibo/sd-sans.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"SD Sans";src:url(/recibo/sd-sans-bold.woff2) format("woff2");font-weight:700;font-display:swap}
 @font-face{font-family:"SD Mono";src:url(/recibo/sd-mono.woff2) format("woff2");font-weight:400;font-display:swap}
@@ -114,10 +114,10 @@ footer a:hover{color:var(--white)}
 @media print{body{background:#fff;color:#000}.top,.actions,.note,footer,.pill{display:none}.ticket{box-shadow:none;border:1px solid #ccc}}
 `;
 
-const WA_ICON =
+export const WA_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2a9.9 9.9 0 0 0-8.5 14.98L2 22l5.17-1.5A9.93 9.93 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.07.89.9-2.99-.2-.31a8.2 8.2 0 1 1 6.87 3.74Zm4.5-6.14c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.12-.16.25-.64.8-.79.97-.14.16-.29.18-.54.06a6.7 6.7 0 0 1-3.32-2.9c-.25-.43.25-.4.71-1.33.08-.16.04-.3-.02-.43l-.76-1.83c-.2-.48-.4-.41-.56-.42h-.47a.9.9 0 0 0-.66.31 2.77 2.77 0 0 0-.86 2.06 4.82 4.82 0 0 0 1 2.56 11 11 0 0 0 4.22 3.73c1.57.68 2.19.74 2.98.62.48-.07 1.46-.6 1.67-1.18.2-.58.2-1.08.14-1.18-.06-.11-.22-.17-.47-.29Z"/></svg>';
 
-function shell(title: string, body: string): string {
+export function shell(title: string, body: string, label = 'Recibo en línea', extraCss = ''): string {
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -128,13 +128,13 @@ function shell(title: string, body: string): string {
 <title>${esc(title)}</title>
 <link rel="icon" href="/favicon.ico">
 <link rel="preload" href="/recibo/sd-sans-bold.woff2" as="font" type="font/woff2" crossorigin>
-<style>${CSS}</style>
+<style>${CSS}${extraCss}</style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
 <a href="${BRAND_SITE}" aria-label="SD Tech Systems"><img src="/recibo/sdtech-systems.png" alt="SD Tech Systems" width="105" height="30"></a>
-<span class="mono">Recibo en línea</span>
+<span class="mono">${esc(label)}</span>
 </header>
 <main>
 ${body}

@@ -26,6 +26,7 @@ import UsersPage from "./pages/Users";
 import ExpensesPage from "./pages/Expenses";
 import DebtsPage from "./pages/Debts";
 import InvestorPage from "./pages/Investor";
+import OrderTrackingPage from "./pages/OrderTracking";
 import PaymentMethodsSettings from "./pages/settings/PaymentMethodsSettings";
 import ProductCategoriesSettings from "./pages/settings/ProductCategoriesSettings";
 import ExpenseCategoriesSettings from "./pages/settings/ExpenseCategoriesSettings";
@@ -168,6 +169,14 @@ const App = () => {
                     element={
                       <ErrorBoundary>
                         <InvestorPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/tracking"
+                    element={
+                      <ErrorBoundary>
+                        <OrderTrackingPage />
                       </ErrorBoundary>
                     }
                   />

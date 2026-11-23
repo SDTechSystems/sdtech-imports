@@ -42,6 +42,7 @@ export async function buildBackupData() {
     stockOpnames: await db.stockOpnames.toArray(),
     stockOpnameItems: await db.stockOpnameItems.toArray(),
     deletedRecords: await db.deletedRecords.toArray(),
+    orderTrackings: await db.orderTrackings.toArray(),
   };
 }
 
@@ -94,6 +95,8 @@ async function clearAllTables(includeConditional: BackupData) {
     await db.stockOpnameItems.clear();
   }
   await db.deletedRecords.clear();
+  // Las copias anteriores al seguimiento de pedidos no traen la tabla: se conservan los pedidos.
+  if (Array.isArray(includeConditional.orderTrackings)) await db.orderTrackings.clear();
 }
 
 /**
@@ -125,6 +128,7 @@ export async function restoreFromBackupData(data: unknown): Promise<void> {
     stockOpnames: await db.stockOpnames.toArray(),
     stockOpnameItems: await db.stockOpnameItems.toArray(),
     deletedRecords: await db.deletedRecords.toArray(),
+    orderTrackings: await db.orderTrackings.toArray(),
   };
 
   try {
@@ -153,6 +157,7 @@ export async function restoreFromBackupData(data: unknown): Promise<void> {
     if (data.stockOpnames?.length) await db.stockOpnames.bulkAdd(data.stockOpnames);
     if (data.stockOpnameItems?.length) await db.stockOpnameItems.bulkAdd(data.stockOpnameItems);
     if (data.deletedRecords?.length) await db.deletedRecords.bulkAdd(data.deletedRecords);
+    if (data.orderTrackings?.length) await db.orderTrackings.bulkAdd(data.orderTrackings);
 
     // Units (v3+ backup) atau diturunkan dari produk (backup v1/v2).
     if (Array.isArray(data.units) && data.units.length > 0) {
@@ -221,6 +226,7 @@ export async function restoreFromBackupData(data: unknown): Promise<void> {
       await db.stockOpnames.clear();
       await db.stockOpnameItems.clear();
       await db.deletedRecords.clear();
+      await db.orderTrackings.clear();
 
       if (snapshot.categories.length) await db.categories.bulkAdd(snapshot.categories);
       if (snapshot.products.length) await db.products.bulkAdd(snapshot.products);
@@ -242,6 +248,7 @@ export async function restoreFromBackupData(data: unknown): Promise<void> {
       if (snapshot.stockOpnames.length) await db.stockOpnames.bulkAdd(snapshot.stockOpnames);
       if (snapshot.stockOpnameItems.length) await db.stockOpnameItems.bulkAdd(snapshot.stockOpnameItems);
       if (snapshot.deletedRecords.length) await db.deletedRecords.bulkAdd(snapshot.deletedRecords);
+      if (snapshot.orderTrackings.length) await db.orderTrackings.bulkAdd(snapshot.orderTrackings);
     } catch {
       throw new Error(backupText('rollbackFailed'));
     }

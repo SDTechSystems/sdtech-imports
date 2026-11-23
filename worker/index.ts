@@ -7,6 +7,10 @@
  *   DELETE /api/receipts/<cód>   marca un recibo como anulado (requiere clave)
  *   GET    /api/verify/<cód>     verifica un recibo, pública
  *   GET    /verificar/<cód>      página del recibo para el cliente (HTML), pública
+ *   POST   /api/tracking         publica o actualiza un pedido en seguimiento (requiere clave)
+ *   DELETE /api/tracking/<cód>   quita un pedido del seguimiento (requiere clave)
+ *   GET    /api/track/<cód>      estado de un pedido, pública
+ *   GET    /seguimiento[/<cód>]  página de seguimiento para el cliente (HTML), pública
  *
  * En recibos.sdtechsystems.dev solo se sirve la página del recibo: la app de
  * caja y la API de copias siguen en la dirección workers.dev.
@@ -37,6 +41,7 @@ interface KVNamespace {
 }
 
 import { renderReceiptPage, RECEIPT_PAGE_HEADERS, BRAND_SITE, type ReceiptPageState } from './receipt-page';
+import { renderTrackingPage, TRACKING_PAGE_HEADERS, cleanTracking, type TrackingPageData, type TrackingPageState } from './tracking-page';
 
 /** Dominio público de los recibos (QR). */
 const RECEIPTS_HOST = 'recibos.sdtechsystems.dev';
@@ -216,6 +221,30 @@ async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt 
   });
 }
 
+// === Seguimiento de pedidos ===
+
+const MAX_TRACKING = 64 * 1024;
+
+/** Busca el pedido en la última copia de seguridad (por si no se publicó). */
+async function trackingFromBackup(env: Env, code: string): Promise<TrackingPageData | null> {
+  const raw = await env.BACKUPS.get('backup:latest', 'text');
+  if (!raw || !raw.includes(code)) return null;
+  const data = JSON.parse(raw) as { orderTrackings?: Record<string, unknown>[]; storeSettings?: { storeName?: string; phone?: string }[] };
+  const order = data.orderTrackings?.find((o) => o.code === code);
+  if (!order) return null;
+  return cleanTracking({
+    ...order,
+    store: data.storeSettings?.[0]?.storeName,
+    phone: data.storeSettings?.[0]?.phone,
+  });
+}
+
+async function findTracking(env: Env, code: string): Promise<TrackingPageData | null> {
+  const stored = await env.BACKUPS.get(`tracking:${code}`, 'text');
+  if (stored === 'deleted') return null;
+  return stored ? (JSON.parse(stored) as TrackingPageData) : await trackingFromBackup(env, code);
+}
+
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   if (!env.BACKUPS) return json({ error: 'storage_unavailable' }, 503);
 
@@ -265,6 +294,43 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     const receipt = stored ? (JSON.parse(stored) as PublicReceipt) : await receiptFromBackup(env, code);
     if (!receipt) return json({ error: 'not_found' }, 404);
     await env.BACKUPS.put(`receipt:${code}`, JSON.stringify({ ...receipt, status: 'void' }));
+    return json({ ok: true });
+  }
+
+  const trackMatch = url.pathname.match(/^\/api\/track\/([^/]+)$/);
+  if (trackMatch && request.method === 'GET') {
+    const code = decodeURIComponent(trackMatch[1]).toUpperCase();
+    if (!CODE_RE.test(code)) return json({ error: 'not_found' }, 404);
+    const tracking = await findTracking(env, code);
+    if (!tracking) return json({ error: 'not_found' }, 404);
+    return json({ tracking });
+  }
+
+  if (url.pathname === '/api/tracking' && request.method === 'POST') {
+    const auth = await authorize(request, env, false);
+    if (!auth.ok) return auth.response;
+    const body = await request.text();
+    if (body.length > MAX_TRACKING) return json({ error: 'too_large' }, 413);
+    let tracking: TrackingPageData | null = null;
+    try {
+      tracking = cleanTracking(JSON.parse(body));
+    } catch {
+      tracking = null;
+    }
+    if (!tracking) return json({ error: 'invalid_tracking' }, 400);
+    await env.BACKUPS.put(`tracking:${tracking.code}`, JSON.stringify(tracking));
+    if (tracking.phone) await env.BACKUPS.put(CONTACT_KEY, tracking.phone);
+    return json({ ok: true });
+  }
+
+  const trackingMatch = url.pathname.match(/^\/api\/tracking\/([^/]+)$/);
+  if (trackingMatch && request.method === 'DELETE') {
+    const auth = await authorize(request, env, false);
+    if (!auth.ok) return auth.response;
+    const code = decodeURIComponent(trackingMatch[1]).toUpperCase();
+    if (!CODE_RE.test(code)) return json({ error: 'bad_code' }, 400);
+    // Se deja una marca para que tampoco aparezca desde la copia de seguridad.
+    await env.BACKUPS.put(`tracking:${code}`, 'deleted');
     return json({ ok: true });
   }
 
@@ -368,9 +434,35 @@ async function receiptPage(env: Env, rawCode: string): Promise<Response> {
   return new Response(html, { status, headers: RECEIPT_PAGE_HEADERS });
 }
 
+/** GET /seguimiento[/<código>]: la página de seguimiento del pedido. */
+async function trackingPage(env: Env, rawCode: string | undefined): Promise<Response> {
+  const code = decodeURIComponent(rawCode ?? '').trim().toUpperCase().slice(0, 32);
+  let state: TrackingPageState;
+  if (!code) {
+    state = { kind: 'lookup' };
+  } else if (!CODE_RE.test(code)) {
+    state = { kind: 'lookup', code, notFound: true };
+  } else if (!env.BACKUPS) {
+    state = { kind: 'error', code };
+  } else {
+    try {
+      const tracking = await findTracking(env, code);
+      if (tracking && !tracking.phone) tracking.phone = (await env.BACKUPS.get(CONTACT_KEY, 'text')) || undefined;
+      state = tracking ? { kind: 'tracking', tracking } : { kind: 'lookup', code, notFound: true };
+    } catch {
+      state = { kind: 'error', code };
+    }
+  }
+  const { html, status } = renderTrackingPage(state);
+  return new Response(html, { status, headers: TRACKING_PAGE_HEADERS });
+}
+
 /** Lo que se puede abrir en el dominio de recibos: la página, sus recursos y la verificación. */
 function allowedOnReceiptsHost(path: string): boolean {
   return (
+    path === '/seguimiento' ||
+    path.startsWith('/seguimiento/') ||
+    path.startsWith('/api/track/') ||
     path.startsWith('/verificar/') ||
     path.startsWith('/recibo/') ||
     path.startsWith('/api/verify/') ||
@@ -391,6 +483,17 @@ export default {
 
     const page = url.pathname.match(/^\/verificar\/([^/]+)\/?$/);
     if (page && (request.method === 'GET' || request.method === 'HEAD')) return receiptPage(env, page[1]);
+
+    const track = url.pathname.match(/^\/seguimiento(?:\/([^/]*))?\/?$/);
+    if (track && (request.method === 'GET' || request.method === 'HEAD')) {
+      // El formulario de búsqueda llega como /seguimiento?codigo=XXXX.
+      const fromForm = url.searchParams.get('codigo');
+      if (!track[1] && fromForm) {
+        const clean = fromForm.replace(/[^0-9A-Za-z]/g, '').toUpperCase().slice(0, 16);
+        return Response.redirect(`${url.origin}/seguimiento/${clean}`, 303);
+      }
+      return trackingPage(env, track[1]);
+    }
 
     if (url.pathname.startsWith('/api/')) {
       try {

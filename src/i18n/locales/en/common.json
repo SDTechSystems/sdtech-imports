@@ -71,6 +71,11 @@
     "skip": "Skip"
   },
   "whatsNewFeatures": {
+    "2026-11-order-tracking": {
+      "title": "Order tracking",
+      "description": "Customers who paid in advance can now see where their order is: transit, customs, city. You update the status and send them the link on WhatsApp.",
+      "ctaLabel": "Open tracking"
+    },
     "2026-11-preorder": {
       "title": "Sell to order",
       "description": "Mark a product as “Sold to order” and you can charge for it at the register even with no stock. Those units show as “to deliver” until the purchase arrives.",

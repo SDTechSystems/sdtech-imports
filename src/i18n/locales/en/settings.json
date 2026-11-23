@@ -100,6 +100,11 @@
     "stockReport": {
       "title": "Stock Report",
       "description": "View stock movements per period"
+    },
+    "orderTracking": {
+      "title": "Order tracking",
+      "description_one": "{{count}} order in progress · customer link",
+      "description_other": "{{count}} orders in progress · customer link"
     }
   },
   "masterData": {
@@ -1351,5 +1356,101 @@
     "downloaded": "Image saved",
     "error": "The image could not be created",
     "copiedForUser": "Text copied. If the chat opens empty, paste it and send."
+  },
+  "orderTracking": {
+    "title": "Order tracking",
+    "add": "New",
+    "back": "Back",
+    "intro": "Prepaid orders. Every update you save shows on the customer's link.",
+    "locked": {
+      "title": "Order tracking",
+      "permissionLabel": "Manage customers"
+    },
+    "filter": {
+      "active": "In progress",
+      "delivered": "Delivered",
+      "all": "All"
+    },
+    "searchPlaceholder": "Search by order, customer or code",
+    "empty": "No orders are being tracked yet.",
+    "noCustomer": "No customer",
+    "stages": {
+      "confirmed": "Order confirmed",
+      "purchased": "Bought from supplier",
+      "origin_warehouse": "At origin warehouse",
+      "international_transit": "International transit",
+      "customs": "In customs",
+      "national_transit": "Domestic transit",
+      "ready": "Ready for delivery",
+      "delivered": "Delivered",
+      "issue": "Issue"
+    },
+    "form": {
+      "addTitle": "New tracked order",
+      "editTitle": "Edit order",
+      "customer": "Customer",
+      "sale": "Linked sale (optional)",
+      "noSale": "None",
+      "saleHint": "Uses the products and amount paid from that sale.",
+      "title": "What the customer ordered",
+      "titlePlaceholder": "e.g. iPhone 15 Pro 256 GB black",
+      "titleHint": "The customer sees this text on their link.",
+      "titleRequired": "Enter what the customer ordered",
+      "amountPaid": "Amount paid",
+      "eta": "Estimated delivery (optional)",
+      "firstCity": "City (optional)",
+      "firstNote": "Message for the customer (optional)",
+      "internalNotes": "Internal notes (optional)",
+      "internalNotesPlaceholder": "Tracking number, supplier, mailbox… Not shown to the customer",
+      "save": "Save"
+    },
+    "detail": {
+      "paid": "Paid: {{amount}}",
+      "eta": "Estimated delivery: {{date}}",
+      "linkTitle": "Customer link",
+      "copy": "Copy",
+      "open": "Open",
+      "send": "Send",
+      "notify": "Notify on WhatsApp",
+      "addUpdate": "New update",
+      "stage": "Status",
+      "city": "City",
+      "cityPlaceholder": "e.g. Miami, Bogotá, Medellín",
+      "note": "Message for the customer (optional)",
+      "notePlaceholder": "e.g. Arrived at the mailbox, ships Thursday",
+      "noteHint": "This message shows on the customer's link.",
+      "date": "Date and time",
+      "save": "Save update",
+      "history": "History",
+      "removeEvent": "Remove update",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "message": {
+      "greetingName": "Hi {{name}},",
+      "greeting": "Hi,",
+      "start": "you can follow your order \"{{title}}\" here: {{url}} (code {{code}})",
+      "update": "your order \"{{title}}\" is now: {{stage}}{{where}}. Follow it here: {{url}}"
+    },
+    "toast": {
+      "created": "Order created",
+      "updated": "Order updated",
+      "eventAdded": "Update saved",
+      "deleted": "Order deleted",
+      "copied": "Link copied",
+      "notPublished": "Saved on this device. Connect the cloud backup (Settings) so the customer sees the change.",
+      "publishError": "Could not publish to the cloud. Try again."
+    },
+    "deleteDialog": {
+      "title": "Delete this order?",
+      "description": "The customer's link will stop working. This does not delete the sale.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "removeEventDialog": {
+      "title": "Remove this update?",
+      "description": "It will no longer show on the customer's link.",
+      "confirm": "Remove"
+    }
   }
 }
