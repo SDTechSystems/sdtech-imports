@@ -45,6 +45,54 @@ export function landedCost({ quantity, usdUnitPrice, exchangeRate, shippingCost 
   return { productCop, shippingCop, totalCop, unitCop };
 }
 
+export interface OrderLineInput {
+  quantity: number;
+  unitPrice: number; // en la moneda del pedido
+}
+
+export interface OrderLineCost {
+  productCop: number;
+  shippingCop: number; // parte del envío que le toca a esta línea
+  totalCop: number;
+  unitCop: number;
+}
+
+/**
+ * Reparte un pedido de varios productos: convierte cada línea a pesos y le
+ * asigna una parte del envío proporcional a su valor (un cable de US$5 no
+ * carga el mismo envío que una tableta de US$200). Las partes suman
+ * exactamente el envío total.
+ */
+export function splitOrderCost(lines: OrderLineInput[], exchangeRate: number, shippingCost = 0): OrderLineCost[] {
+  const shipping = Math.max(0, Math.round(shippingCost));
+  const products = lines.map((l) => Math.round(Math.max(0, l.quantity) * l.unitPrice * exchangeRate));
+  const totalValue = products.reduce((a, b) => a + b, 0);
+  const totalQty = lines.reduce((a, l) => a + Math.max(0, l.quantity), 0);
+  const shares = lines.map((l, i) => {
+    if (totalValue > 0) return Math.floor((shipping * products[i]) / totalValue);
+    return totalQty > 0 ? Math.floor((shipping * Math.max(0, l.quantity)) / totalQty) : 0;
+  });
+  // El sobrante del redondeo va a la línea de mayor valor.
+  const remainder = shipping - shares.reduce((a, b) => a + b, 0);
+  if (remainder !== 0 && lines.length > 0) {
+    const idx = products.indexOf(Math.max(...products));
+    shares[idx] += remainder;
+  }
+  return lines.map((l, i) => {
+    const totalCop = products[i] + shares[i];
+    return {
+      productCop: products[i],
+      shippingCop: shares[i],
+      totalCop,
+      unitCop: l.quantity > 0 ? Math.round(totalCop / l.quantity) : 0,
+    };
+  });
+}
+
+export function newOrderId(): string {
+  return `PED-${Date.now().toString(36).toUpperCase()}`;
+}
+
 /** Costo promedio ponderado al sumar `qty` unidades a `unitCost` sobre el inventario actual. */
 export function weightedAverageCost(oldStock: number, oldCost: number, qty: number, unitCost: number): number {
   const base = Math.max(0, oldStock);
@@ -82,6 +130,13 @@ export async function receiveStockIn(stockInId: number, receivedAt = new Date())
     await db.stockIns.update(stockInId, { status: 'received', receivedAt });
     return true;
   });
+}
+
+/** Marca como recibidas varias compras (por ejemplo, las de un pedido). Devuelve cuántas recibió. */
+export async function receiveStockIns(ids: number[], receivedAt = new Date()): Promise<number> {
+  let count = 0;
+  for (const id of ids) if (await receiveStockIn(id, receivedAt)) count++;
+  return count;
 }
 
 /** Unidades en camino por producto (para mostrarlas junto al inventario). */

@@ -530,7 +530,22 @@
       "markReceived": "Llegó: marcar como recibido",
       "alreadyReceived": "Ya está recibido y disponible en el inventario.",
       "receivedToast": "{{product}} (+{{qty}}) ya está disponible para vender.",
-      "receiveError": "No se pudo marcar como recibido."
+      "receiveError": "No se pudo marcar como recibido.",
+      "productsLabel": "Productos del pedido *",
+      "addLine": "Agregar otro producto al pedido",
+      "removeLine": "Quitar producto",
+      "lineSummary": "{{total}} (envío {{shipping}}) · {{unit}} c/u",
+      "shippingHintOrder": "Envío de todo el pedido. Se reparte entre los productos según su valor.",
+      "orderSavedInTransit_one": "Pedido con {{count}} producto en tránsito.",
+      "orderSavedInTransit_other": "Pedido con {{count}} productos en tránsito. Márcalo cuando llegue.",
+      "orderReceivedToast_one": "{{count}} producto ya está disponible para vender.",
+      "orderReceivedToast_other": "{{count}} productos ya están disponibles para vender.",
+      "orderTitle": "Pedido {{id}} · {{count}} productos",
+      "unitCostShort": "{{cost}} c/u con envío",
+      "rateUsed": "Tasa usada",
+      "markOrderReceived": "Llegó todo el pedido",
+      "markSomeReceived_one": "Marcar {{count}} producto como recibido",
+      "markSomeReceived_other": "Marcar {{count}} productos como recibidos"
     }
   },
   "stockOut": {

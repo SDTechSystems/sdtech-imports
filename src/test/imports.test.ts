@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
 import { db } from '@/lib/db';
-import { landedCost, weightedAverageCost, receiveStockIn, inTransitByProduct } from '@/lib/imports';
+import { landedCost, weightedAverageCost, receiveStockIn, inTransitByProduct, splitOrderCost } from '@/lib/imports';
 import { generateVerifyCode, isValidVerifyCode, getVerifyBaseUrl, verifyUrl } from '@/lib/receipt-verify';
 import { escposQr } from '@/lib/printer';
 
@@ -85,5 +85,25 @@ describe('verificación de recibos', () => {
     expect(cmd).toContain(url);
     const store = cmd.indexOf('\x31\x50\x30');
     expect(cmd.charCodeAt(store - 2)).toBe(url.length + 3);
+  });
+});
+
+describe('splitOrderCost', () => {
+  it('reparte el envío según el valor y suma exacto', () => {
+    const lines = [
+      { quantity: 1, unitPrice: 200 }, // tableta
+      { quantity: 2, unitPrice: 5 }, // cables
+    ];
+    const r = splitOrderCost(lines, 4000, 100000);
+    expect(r[0].productCop).toBe(800000);
+    expect(r[1].productCop).toBe(40000);
+    expect(r[0].shippingCop + r[1].shippingCop).toBe(100000);
+    expect(r[0].shippingCop).toBeGreaterThan(r[1].shippingCop * 10);
+    expect(r[1].unitCop).toBe(Math.round(r[1].totalCop / 2));
+  });
+
+  it('con una sola línea equivale a landedCost', () => {
+    const [one] = splitOrderCost([{ quantity: 4, unitPrice: 24.99 }], 4100, 60000);
+    expect(one).toEqual(landedCost({ quantity: 4, usdUnitPrice: 24.99, exchangeRate: 4100, shippingCost: 60000 }));
   });
 });

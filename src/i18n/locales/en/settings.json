@@ -530,7 +530,22 @@
       "markReceived": "Arrived: mark as received",
       "alreadyReceived": "Already received and available in stock.",
       "receivedToast": "{{product}} (+{{qty}}) is now available for sale.",
-      "receiveError": "Couldn't mark it as received."
+      "receiveError": "Couldn't mark it as received.",
+      "productsLabel": "Order products *",
+      "addLine": "Add another product to the order",
+      "removeLine": "Remove product",
+      "lineSummary": "{{total}} (shipping {{shipping}}) · {{unit}} each",
+      "shippingHintOrder": "Shipping for the whole order. Split across products by value.",
+      "orderSavedInTransit_one": "Order with {{count}} product in transit.",
+      "orderSavedInTransit_other": "Order with {{count}} products in transit. Mark it when it arrives.",
+      "orderReceivedToast_one": "{{count}} product is now available for sale.",
+      "orderReceivedToast_other": "{{count}} products are now available for sale.",
+      "orderTitle": "Order {{id}} · {{count}} products",
+      "unitCostShort": "{{cost}} each incl. shipping",
+      "rateUsed": "Rate used",
+      "markOrderReceived": "Whole order arrived",
+      "markSomeReceived_one": "Mark {{count}} product as received",
+      "markSomeReceived_other": "Mark {{count}} products as received"
     }
   },
   "stockOut": {

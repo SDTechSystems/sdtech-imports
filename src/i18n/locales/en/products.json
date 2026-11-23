@@ -15,7 +15,8 @@
     "sku": "SKU",
     "hpp": "COGS",
     "stock": "Stock",
-    "stockUnmanaged": "Stock not managed"
+    "stockUnmanaged": "Stock not managed",
+    "inTransit": "+{{qty}} on the way"
   },
   "dialog": {
     "titleEdit": "Edit Product",

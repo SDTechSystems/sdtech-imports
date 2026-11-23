@@ -41,6 +41,8 @@ interface ParsedRow {
 }
 
 import HomeStockDialog from '@/components/HomeStockDialog';
+import { inTransitByProduct } from '@/lib/imports';
+import { Plane } from 'lucide-react';
 
 export default function Produk() {
   const { currentUser, can } = useAuth();
@@ -81,6 +83,7 @@ export default function Produk() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const products = useLiveQuery(() => db.products.where('isDeleted').equals(0).toArray());
+  const inTransit = useLiveQuery(() => inTransitByProduct(), []);
   const categories = useLiveQuery(() => db.categories.where('isDeleted').equals(0).toArray());
   const units = useLiveQuery(() => db.units.where('isDeleted').equals(0).toArray());
 
@@ -654,10 +657,16 @@ export default function Produk() {
                       <span className="text-sm font-bold text-primary">{rp(p.price)}</span>
                       <span className="text-xs text-muted-foreground">{t('card.hpp')}: {rp(p.hpp)}</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
                       {isStockManaged(p) ? (
                         <span className={cn('text-xs font-medium px-1.5 py-0.5 rounded', p.stock <= 5 ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success')}>
                           {t('card.stock')}: {p.stock} {p.unit}
+                        </span>
+                      ) : null}
+                      {(inTransit?.get(p.id!) ?? 0) > 0 ? (
+                        <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                          <Plane className="w-3 h-3" />
+                          {t('card.inTransit', { qty: inTransit?.get(p.id!) })}
                         </span>
                       ) : null}
                       {isStockManaged(p) && (p.stockHome ?? 0) > 0 ? (

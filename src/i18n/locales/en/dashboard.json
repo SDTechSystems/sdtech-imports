@@ -43,6 +43,8 @@
     "line": "×{{qty}} · paid {{days}} ago",
     "days_one": "{{count}} day",
     "days_other": "{{count}} days",
-    "open": "Open"
+    "open": "Open",
+    "order_one": "Order of {{count}} product",
+    "order_other": "Order of {{count}} products"
   }
 }

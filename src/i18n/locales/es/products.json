@@ -15,7 +15,8 @@
     "sku": "SKU",
     "hpp": "Costo",
     "stock": "Stock",
-    "stockUnmanaged": "Stock sin control"
+    "stockUnmanaged": "Stock sin control",
+    "inTransit": "+{{qty}} en camino"
   },
   "dialog": {
     "titleEdit": "Editar producto",

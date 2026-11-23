@@ -20,11 +20,26 @@ export default function InTransitPanel() {
     const list = await db.stockIns.where('status').equals('in_transit').toArray();
     list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const products = await db.products.bulkGet(list.map((s) => s.productId));
-    return list.map((s, i) => ({ ...s, productName: products[i]?.name ?? '-' }));
+    // Un pedido con varios productos se muestra como una sola tarjeta.
+    const groups: { key: string; firstId: number; orderId?: string; names: string[]; qty: number; total: number; date: Date; origin?: typeof list[number]['origin']; tracking?: string }[] = [];
+    const byKey = new Map<string, (typeof groups)[number]>();
+    list.forEach((s, i) => {
+      const key = s.orderId ?? `si-${s.id}`;
+      let g = byKey.get(key);
+      if (!g) {
+        g = { key, firstId: s.id!, orderId: s.orderId, names: [], qty: 0, total: 0, date: s.date, origin: s.origin, tracking: s.tracking };
+        byKey.set(key, g);
+        groups.push(g);
+      }
+      g.names.push(products[i]?.name ?? '-');
+      g.qty += s.quantity;
+      g.total += s.totalPrice;
+    });
+    return groups;
   }, []);
 
   if (!rows) return null;
-  const total = rows.reduce((s, r) => s + r.totalPrice, 0);
+  const total = rows.reduce((s, r) => s + r.total, 0);
 
   return (
     <div>
@@ -53,22 +68,26 @@ export default function InTransitPanel() {
           <div className="grid gap-2 md:grid-cols-2">
             {rows.map((r) => {
               const days = differenceInCalendarDays(new Date(), new Date(r.date));
+              const isOrder = r.names.length > 1;
               return (
                 <Card
-                  key={r.id}
+                  key={r.key}
                   className="border-0 shadow-sm bg-amber-500/10 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setOpenId(r.id!)}
+                  onClick={() => setOpenId(r.firstId)}
                 >
                   <CardContent className="p-3 flex items-center gap-3">
                     <div className="text-2xl leading-none">{r.origin ? ORIGIN_FLAG[r.origin] : '📦'}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{r.productName}</p>
+                      <p className="text-sm font-semibold truncate">
+                        {isOrder ? t('inTransit.order', { count: r.names.length }) : r.names[0]}
+                      </p>
+                      {isOrder && <p className="text-xs text-muted-foreground truncate">{r.names.join(', ')}</p>}
                       <p className="text-xs text-muted-foreground">
-                        {t('inTransit.line', { qty: r.quantity, days: t('inTransit.days', { count: days }) })}
+                        {t('inTransit.line', { qty: r.qty, days: t('inTransit.days', { count: days }) })}
                         {r.tracking ? ` · ${r.tracking}` : ''}
                       </p>
                     </div>
-                    <Button size="sm" className="h-8 text-xs shrink-0" onClick={(e) => { e.stopPropagation(); setOpenId(r.id!); }}>
+                    <Button size="sm" className="h-8 text-xs shrink-0" onClick={(e) => { e.stopPropagation(); setOpenId(r.firstId); }}>
                       {t('inTransit.open')}
                     </Button>
                   </CardContent>

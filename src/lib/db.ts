@@ -138,6 +138,7 @@ export interface StockIn {
   exchangeRateSource?: 'market' | 'manual';
   shippingCost?: number; // envío total en pesos, escrito a mano
   tracking?: string; // número de guía / pedido de Amazon
+  orderId?: string; // compras del mismo pedido (comparten tasa, envío y guía)
   toHome?: boolean; // al recibirlo entra al inventario de casa
   receivedAt?: Date | null;
   createdBy?: number; // userId
@@ -837,6 +838,11 @@ class PosDatabase extends Dexie {
         if (!record.status) record.status = 'received';
       });
     });
+
+    // Version 16 - Pedidos con varios productos
+    this.version(16).stores({
+      stockIns: '++id, productId, supplierId, date, status, orderId, createdBy, updatedAt, syncedAt',
+    });
   }
 }
 
@@ -932,8 +938,8 @@ export async function seedDefaultData() {
   const categoryCount = await db.categories.count();
   if (categoryCount === 0) {
     await db.categories.bulkAdd([
-      { name: 'Comidas', color: '#FF6B35', icon: '🍕', createdAt: new Date(), isDeleted: 0, deletedAt: null },
-      { name: 'Bebidas', color: '#4ECDC4', icon: '🥤', createdAt: new Date(), isDeleted: 0, deletedAt: null },
+      { name: 'Tecnología', color: '#0070B3', icon: '💻', createdAt: new Date(), isDeleted: 0, deletedAt: null },
+      { name: 'Accesorios', color: '#00BFEF', icon: '🎧', createdAt: new Date(), isDeleted: 0, deletedAt: null },
       { name: 'Otros', color: '#95A5A6', icon: '📦', createdAt: new Date(), isDeleted: 0, deletedAt: null },
     ]);
   }
