@@ -10,5 +10,8 @@
     "run_worker_first": ["/api/*"]
   },
   // Cloudflare crea el espacio KV automáticamente en el primer despliegue.
-  "kv_namespaces": [{ "binding": "BACKUPS" }]
+  "kv_namespaces": [{ "binding": "BACKUPS" }],
+  // Vistas previas por rama (npx wrangler preview). Sin BACKUPS a propósito:
+  // una rama de prueba no debe leer ni escribir las copias reales de la tienda.
+  "previews": {}
 }
