@@ -71,6 +71,11 @@
     "skip": "Omitir"
   },
   "whatsNewFeatures": {
+    "2026-11-order-tracking": {
+      "title": "Seguimiento de pedidos",
+      "description": "Tus clientes que pagaron por adelantado ya pueden ver dónde va su pedido: tránsito, aduanas, ciudad. Tú actualizas el estado y les envías el enlace por WhatsApp.",
+      "ctaLabel": "Abrir seguimiento"
+    },
     "2026-11-preorder": {
       "title": "Ventas por encargo",
       "description": "Marca un producto como «Se vende por encargo» y podrás cobrarlo en la caja aunque no tengas existencias. Lo que vendas así queda como «por entregar» hasta que recibas la compra.",

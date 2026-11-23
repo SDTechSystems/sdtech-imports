@@ -1,4 +1,4 @@
-import { PackageCheck, Plane, QrCode, type LucideIcon } from 'lucide-react';
+import { PackageCheck, PackageSearch, Plane, QrCode, type LucideIcon } from 'lucide-react';
 import { db } from './db';
 
 /**
@@ -23,6 +23,13 @@ export interface WhatsNewFeature {
 }
 
 export const FEATURES: WhatsNewFeature[] = [
+  {
+    id: '2026-11-order-tracking',
+    icon: PackageSearch,
+    iconColor: 'text-accent bg-accent/10',
+    publishedAt: '2026-11-23',
+    cta: { to: '/tracking' },
+  },
   {
     id: '2026-11-preorder',
     icon: PackageCheck,

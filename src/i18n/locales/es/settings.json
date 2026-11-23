@@ -100,6 +100,11 @@
     "stockReport": {
       "title": "Reporte de inventario",
       "description": "Ve los movimientos de inventario por período"
+    },
+    "orderTracking": {
+      "title": "Seguimiento de pedidos",
+      "description_one": "{{count}} pedido en curso · enlace para el cliente",
+      "description_other": "{{count}} pedidos en curso · enlace para el cliente"
     }
   },
   "masterData": {
@@ -1351,5 +1356,101 @@
     "downloaded": "Imagen guardada",
     "error": "No se pudo crear la imagen",
     "copiedForUser": "Texto copiado. Si el chat se abre vacío, pégalo y envíalo."
+  },
+  "orderTracking": {
+    "title": "Seguimiento de pedidos",
+    "add": "Nuevo",
+    "back": "Volver",
+    "intro": "Pedidos pagados por adelantado. Cada actualización que guardes aparece en el enlace del cliente.",
+    "locked": {
+      "title": "Seguimiento de pedidos",
+      "permissionLabel": "Gestionar clientes"
+    },
+    "filter": {
+      "active": "En curso",
+      "delivered": "Entregados",
+      "all": "Todos"
+    },
+    "searchPlaceholder": "Buscar por pedido, cliente o código",
+    "empty": "Todavía no hay pedidos en seguimiento.",
+    "noCustomer": "Sin cliente",
+    "stages": {
+      "confirmed": "Pedido confirmado",
+      "purchased": "Comprado al proveedor",
+      "origin_warehouse": "En bodega de origen",
+      "international_transit": "En tránsito internacional",
+      "customs": "En aduanas",
+      "national_transit": "En tránsito nacional",
+      "ready": "Listo para entrega",
+      "delivered": "Entregado",
+      "issue": "Novedad"
+    },
+    "form": {
+      "addTitle": "Nuevo pedido en seguimiento",
+      "editTitle": "Editar pedido",
+      "customer": "Cliente",
+      "sale": "Venta asociada (opcional)",
+      "noSale": "Ninguna",
+      "saleHint": "Toma los productos y el valor pagado de esa venta.",
+      "title": "Qué pidió el cliente",
+      "titlePlaceholder": "Ej.: iPhone 15 Pro 256 GB negro",
+      "titleHint": "El cliente ve este texto en su enlace.",
+      "titleRequired": "Escribe qué pidió el cliente",
+      "amountPaid": "Valor pagado",
+      "eta": "Entrega estimada (opcional)",
+      "firstCity": "Ciudad (opcional)",
+      "firstNote": "Mensaje para el cliente (opcional)",
+      "internalNotes": "Notas internas (opcional)",
+      "internalNotesPlaceholder": "Guía, proveedor, casillero… El cliente no las ve",
+      "save": "Guardar"
+    },
+    "detail": {
+      "paid": "Pagado: {{amount}}",
+      "eta": "Entrega estimada: {{date}}",
+      "linkTitle": "Enlace para el cliente",
+      "copy": "Copiar",
+      "open": "Abrir",
+      "send": "Enviar",
+      "notify": "Avisar por WhatsApp",
+      "addUpdate": "Nueva actualización",
+      "stage": "Estado",
+      "city": "Ciudad",
+      "cityPlaceholder": "Ej.: Miami, Bogotá, Medellín",
+      "note": "Mensaje para el cliente (opcional)",
+      "notePlaceholder": "Ej.: Llegó al casillero, sale el jueves",
+      "noteHint": "Este mensaje aparece en el enlace del cliente.",
+      "date": "Fecha y hora",
+      "save": "Guardar actualización",
+      "history": "Historial",
+      "removeEvent": "Quitar actualización",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "message": {
+      "greetingName": "Hola {{name}},",
+      "greeting": "Hola,",
+      "start": "aquí puedes seguir tu pedido \"{{title}}\": {{url}} (código {{code}})",
+      "update": "tu pedido \"{{title}}\" ahora está: {{stage}}{{where}}. Síguelo aquí: {{url}}"
+    },
+    "toast": {
+      "created": "Pedido creado",
+      "updated": "Pedido actualizado",
+      "eventAdded": "Actualización guardada",
+      "deleted": "Pedido eliminado",
+      "copied": "Enlace copiado",
+      "notPublished": "Guardado en este dispositivo. Conecta la copia en la nube (Ajustes) para que el cliente vea el cambio.",
+      "publishError": "No se pudo publicar en la nube. Inténtalo de nuevo."
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar este pedido?",
+      "description": "El enlace del cliente dejará de funcionar. Esto no borra la venta.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
+    "removeEventDialog": {
+      "title": "¿Quitar esta actualización?",
+      "description": "Dejará de aparecer en el enlace del cliente.",
+      "confirm": "Quitar"
+    }
   }
 }

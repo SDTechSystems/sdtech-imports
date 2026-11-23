@@ -310,6 +310,46 @@ export interface DebtPayment {
   syncedAt?: Date | null;
 }
 
+export type TrackingStage =
+  | 'confirmed' // pedido confirmado y pagado
+  | 'purchased' // comprado al proveedor
+  | 'origin_warehouse' // en bodega o casillero de origen
+  | 'international_transit'
+  | 'customs'
+  | 'national_transit'
+  | 'ready' // listo para entrega o en reparto
+  | 'delivered'
+  | 'issue'; // novedad (retraso, retención, etc.)
+
+export interface TrackingEvent {
+  id: string;
+  stage: TrackingStage;
+  city?: string;
+  note?: string; // la ve el cliente
+  date: string; // ISO
+}
+
+/** Pedido pagado por adelantado con seguimiento público para el cliente. */
+export interface OrderTracking {
+  id?: number;
+  code: string; // código aleatorio del enlace de seguimiento
+  title: string; // lo que ve el cliente, p. ej. "iPhone 15 Pro 256 GB"
+  items?: { name: string; quantity: number }[];
+  customerId?: number;
+  customerName?: string;
+  customerPhone?: string;
+  transactionId?: number; // venta en la que se cobró, si existe
+  amountPaid?: number; // interno, no se publica
+  prepaid?: boolean; // undefined = pagado por adelantado
+  estimatedDate?: string; // AAAA-MM-DD
+  internalNotes?: string; // no se publica
+  status: TrackingStage; // etapa del evento más reciente (para filtrar)
+  events: TrackingEvent[];
+  createdAt: Date;
+  updatedAt?: Date;
+  syncedAt?: Date | null;
+}
+
 export interface DeletedRecord {
   id?: number;
   tableName: string;
@@ -366,6 +406,7 @@ class PosDatabase extends Dexie {
   stockOpnames!: Table<StockOpname>;
   stockOpnameItems!: Table<StockOpnameItem>;
   deletedRecords!: Table<DeletedRecord>;
+  orderTrackings!: Table<OrderTracking>;
 
   constructor() {
     super('kasirgratisan-db');
@@ -844,6 +885,11 @@ class PosDatabase extends Dexie {
     this.version(16).stores({
       stockIns: '++id, productId, supplierId, date, status, orderId, createdBy, updatedAt, syncedAt',
     });
+
+    // Version 17 - Seguimiento de pedidos pagados por adelantado
+    this.version(17).stores({
+      orderTrackings: '++id, &code, status, customerId, createdAt, updatedAt',
+    });
   }
 }
 
@@ -907,6 +953,7 @@ export async function sanitizeDatabaseDates() {
   await sanitizeTableDates(db.debtPayments, ['date', 'updatedAt', 'syncedAt']);
   await sanitizeTableDates(db.stockOpnames, ['date', 'updatedAt', 'syncedAt']);
   await sanitizeTableDates(db.deletedRecords, ['deletedAt', 'syncedAt']);
+  await sanitizeTableDates(db.orderTrackings, ['createdAt', 'updatedAt', 'syncedAt']);
   await sanitizeTableDates(db.storeSettings, ['lastBackupAt', 'lastCloudBackupAt']);
 }
 
@@ -927,7 +974,8 @@ export function setupTimestampHooks(db: PosDatabase) {
     'hppHistory',
     'debts',
     'debtPayments',
-    'stockOpnames'
+    'stockOpnames',
+    'orderTrackings',
   ];
 
   timestampedTables.forEach((tableName) => {
