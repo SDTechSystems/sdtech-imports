@@ -42,6 +42,7 @@ interface PrintData {
   cashierName?: string;
   language?: string;
   verifyUrl?: string; // si existe, se imprime un QR para verificar el recibo
+  tracked?: boolean; // la venta tiene productos por encargo: el QR también lleva al seguimiento
 }
 
 /** Comandos ESC/POS (GS ( k) para imprimir un QR. Solo texto ASCII corto. */
@@ -114,6 +115,7 @@ export const getESCPOSData = ({
   cashierName,
   language,
   verifyUrl,
+  tracked,
 }: PrintData): string => {
   const lines: string[] = [];
   const t = printLabels(language);
@@ -163,7 +165,7 @@ export const getESCPOSData = ({
   lines.push('\x1B\x61\x01'); // Center
   lines.push(`${storeSettings?.receiptFooter || t('thanks')}\n`);
   if (verifyUrl && transaction.verifyCode) {
-    lines.push(`\n${t('verify')}\n`);
+    lines.push(`\n${t(tracked ? 'verifyTracking' : 'verify')}\n`);
     lines.push(escposQr(verifyUrl));
     lines.push(`\n${transaction.verifyCode}\n`);
   }

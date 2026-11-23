@@ -1,4 +1,5 @@
 import { voidReceipt } from '@/lib/receipt-verify';
+import { removeSaleTracking } from '@/lib/order-tracking';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Transaction, type TransactionItemRecord } from '@/lib/db';
 import { useState, useEffect } from 'react';
@@ -169,6 +170,7 @@ export default function TransactionHistory() {
       await db.transactionItems.where('transactionId').equals(selectedTx.id).delete();
       await db.transactions.delete(selectedTx.id);
       void voidReceipt(selectedTx.verifyCode);
+      await removeSaleTracking(selectedTx.id);
       setDeleteDialogOpen(false);
       setDetailOpen(false);
       setSelectedTx(null);

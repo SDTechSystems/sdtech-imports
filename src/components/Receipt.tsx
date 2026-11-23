@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import type { Transaction, StoreSettings, TransactionItemRecord } from '@/lib/db';
+import { db, type Transaction, type StoreSettings, type TransactionItemRecord } from '@/lib/db';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { isNativePlatform, printNativeBluetooth, getESCPOSData } from '@/lib/printer';
 import { Capacitor } from '@capacitor/core';
 import { downloadOrShareFile } from '@/lib/file-utils';
@@ -41,6 +42,11 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
   const verifyBase = getVerifyBaseUrl(storeSettings);
   const verifyLink = transaction.verifyCode && verifyBase ? buildVerifyUrl(verifyBase, transaction.verifyCode) : '';
   const [qrDataUrl, setQrDataUrl] = useState('');
+  // Venta con productos por encargo: el mismo QR lleva al seguimiento del pedido.
+  const hasTracking = useLiveQuery(
+    () => (transaction.id ? db.orderTrackings.where('transactionId').equals(transaction.id).count() : 0),
+    [transaction.id],
+  );
   useEffect(() => {
     if (!verifyLink) { setQrDataUrl(''); return; }
     let cancelled = false;
@@ -140,6 +146,7 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
       cashierName,
       language: i18n.language,
       verifyUrl: verifyLink || undefined,
+      tracked: !!hasTracking,
     };
 
     if (isNativePlatform()) {
@@ -303,7 +310,7 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
           {qrDataUrl && (
             <div className="mt-2 flex flex-col items-center gap-1">
               <img src={qrDataUrl} alt={t('receipt.verifyAlt')} width={120} height={120} style={{ width: 120, height: 120 }} />
-              <p className="text-[9px] text-gray-500 text-center">{t('receipt.verifyHint')}</p>
+              <p className="text-[9px] text-gray-500 text-center">{t(hasTracking ? 'receipt.verifyHintTracking' : 'receipt.verifyHint')}</p>
               <p className="text-[10px] font-bold tracking-widest">{transaction.verifyCode}</p>
             </div>
           )}

@@ -92,3 +92,38 @@ describe('seguimiento de pedidos: Worker', () => {
     expect(formatDay('2026-12-12')).toMatch(/12/);
   });
 });
+
+describe('recibo con productos por encargo', async () => {
+  const { preorderItems, titleForItems } = await import('@/lib/order-tracking');
+  const { renderReceiptPage } = await import('../../worker/receipt-page');
+
+  const items = [
+    { productId: 1, productName: 'Cable USB-C (local)', quantity: 2 },
+    { productId: 2, productName: 'iPhone 15 Pro', quantity: 1 },
+  ];
+  const products = [{ id: 1 }, { id: 2, preorder: true }];
+
+  it('solo los productos por encargo entran al seguimiento', () => {
+    expect(preorderItems(items, products)).toEqual([{ name: 'iPhone 15 Pro', quantity: 1 }]);
+    expect(preorderItems(items, [{ id: 1 }, { id: 2 }])).toEqual([]);
+    expect(titleForItems([{ name: 'A' }, { name: 'B' }, { name: 'C' }])).toBe('A + 2');
+  });
+
+  const receipt = {
+    code: 'ZNXMHKTEVN', receiptNumber: 'TX1', date: '2026-11-23T18:14:00.000Z', store: 'SD Tech Imports',
+    total: 100, items: [{ name: 'iPhone 15 Pro', quantity: 1, subtotal: 100 }], status: 'valid' as const,
+  };
+
+  it('la página del recibo muestra el estado y enlaza el seguimiento', () => {
+    const { html } = renderReceiptPage({ kind: 'receipt', receipt, tracking: { code: 'Y348QWNNTQ', label: 'En aduanas', city: 'Bogotá' } });
+    expect(html).toContain('Tu pedido por encargo');
+    expect(html).toContain('En aduanas');
+    expect(html).toContain('href="/seguimiento/Y348QWNNTQ"');
+  });
+
+  it('sin productos por encargo o con el recibo anulado no hay seguimiento', () => {
+    expect(renderReceiptPage({ kind: 'receipt', receipt }).html).not.toContain('/seguimiento/');
+    const voided = renderReceiptPage({ kind: 'receipt', receipt: { ...receipt, status: 'void' }, tracking: { code: 'Y348QWNNTQ', label: 'En aduanas' } });
+    expect(voided.html).not.toContain('/seguimiento/');
+  });
+});

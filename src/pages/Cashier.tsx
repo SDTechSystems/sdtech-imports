@@ -26,6 +26,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 import { getDateLocale } from '@/i18n';
 import { generateVerifyCode, registerReceipt, toPublicReceipt } from '@/lib/receipt-verify';
+import { syncSaleTracking } from '@/lib/order-tracking';
 import { Truck } from 'lucide-react';
 
 interface CartItem {
@@ -553,7 +554,10 @@ export default function Kasir() {
       if (fromHome) await deductHomeStock();
 
       const updatedTx = await db.transactions.get(editingTxId);
-      if (updatedTx) void registerReceipt(toPublicReceipt(updatedTx, itemRecords, storeSettings?.storeName || 'SD Tech Imports', storeSettings?.phone));
+      if (updatedTx) {
+        const trackingCode = await syncSaleTracking({ ...updatedTx, id: editingTxId }, itemRecords, storeSettings);
+        void registerReceipt(toPublicReceipt(updatedTx, itemRecords, storeSettings?.storeName || 'SD Tech Imports', storeSettings?.phone, trackingCode));
+      }
       toast.success(t('cashier.toast.transactionSuccess', { receiptNumber: updatedTx?.receiptNumber }));
       setLastTransaction(updatedTx || null);
       setLastTxItems(itemRecords);
@@ -621,7 +625,8 @@ export default function Kasir() {
       }
       if (fromHome) await deductHomeStock();
 
-      void registerReceipt(toPublicReceipt({ ...txData, id: txId as number }, itemRecords, storeSettings?.storeName || 'SD Tech Imports', storeSettings?.phone));
+      const trackingCode = await syncSaleTracking({ ...txData, id: txId as number }, itemRecords, storeSettings);
+      void registerReceipt(toPublicReceipt({ ...txData, id: txId as number }, itemRecords, storeSettings?.storeName || 'SD Tech Imports', storeSettings?.phone, trackingCode));
       toast.success(t('cashier.toast.transactionSuccess', { receiptNumber }));
       setLastTransaction({ ...txData, id: txId as number });
       setLastTxItems(itemRecords);

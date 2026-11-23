@@ -1020,6 +1020,7 @@
     "shipping": "Shipping",
     "verifyAlt": "QR to view the purchase online",
     "verifyHint": "Scan to view your purchase online",
+    "verifyHintTracking": "Scan to see your purchase and track your order",
     "verifyNoUrl": "To print a QR, set the public address in Settings → Receipt."
   },
   "users": {

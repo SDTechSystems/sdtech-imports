@@ -171,7 +171,8 @@
       "bluetoothOffHint": "Bluetooth no está activado. Actívalo e inténtalo de nuevo."
     },
     "shipping": "Envio",
-    "verify": "Escanea para ver tu compra en línea"
+    "verify": "Escanea para ver tu compra en línea",
+    "verifyTracking": "Escanea para ver tu compra y seguir tu pedido"
   },
   "permissions": {
     "create_transaction": {

@@ -40,8 +40,8 @@ interface KVNamespace {
   }>;
 }
 
-import { renderReceiptPage, RECEIPT_PAGE_HEADERS, BRAND_SITE, type ReceiptPageState } from './receipt-page';
-import { renderTrackingPage, TRACKING_PAGE_HEADERS, cleanTracking, type TrackingPageData, type TrackingPageState } from './tracking-page';
+import { renderReceiptPage, RECEIPT_PAGE_HEADERS, BRAND_SITE, type ReceiptPageState, type ReceiptTracking } from './receipt-page';
+import { renderTrackingPage, TRACKING_PAGE_HEADERS, cleanTracking, STAGE_LABEL, type TrackingPageData, type TrackingPageState } from './tracking-page';
 
 /** Dominio público de los recibos (QR). */
 const RECEIPTS_HOST = 'recibos.sdtechsystems.dev';
@@ -167,6 +167,7 @@ interface PublicReceipt {
   shippingFee?: number;
   items: { name: string; quantity: number; subtotal: number }[];
   status?: 'valid' | 'void';
+  trackingCode?: string;
 }
 
 const CONTACT_KEY = 'store:contact';
@@ -194,6 +195,7 @@ function cleanReceipt(raw: unknown): PublicReceipt | null {
       return { name: text(it.name, 120), quantity: num(it.quantity), subtotal: num(it.subtotal) };
     }),
     status: r.status === 'void' ? 'void' : 'valid',
+    trackingCode: typeof r.trackingCode === 'string' && CODE_RE.test(r.trackingCode) ? r.trackingCode : undefined,
   };
 }
 
@@ -205,7 +207,12 @@ async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt 
   if (!raw.includes(code)) return null;
   type Tx = { id?: number; verifyCode?: string; receiptNumber?: string; date?: string; total?: number; shippingFee?: number; status?: string };
   type Item = { transactionId?: number; productName?: string; quantity?: number; subtotal?: number };
-  const data = JSON.parse(raw) as { transactions?: Tx[]; transactionItems?: Item[]; storeSettings?: { storeName?: string; phone?: string }[] };
+  const data = JSON.parse(raw) as {
+    transactions?: Tx[];
+    transactionItems?: Item[];
+    storeSettings?: { storeName?: string; phone?: string }[];
+    orderTrackings?: { code?: string; transactionId?: number }[];
+  };
   const tx = data.transactions?.find((t) => t.verifyCode === code && t.status === 'completed');
   if (!tx) return null;
   const items = (data.transactionItems || []).filter((i) => i.transactionId === tx.id);
@@ -218,6 +225,7 @@ async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt 
     total: tx.total,
     shippingFee: tx.shippingFee,
     items: items.map((i) => ({ name: i.productName, quantity: i.quantity, subtotal: i.subtotal })),
+    trackingCode: data.orderTrackings?.find((o) => o.transactionId === tx.id)?.code,
   });
 }
 
@@ -413,6 +421,27 @@ async function findReceipt(env: Env, code: string): Promise<PublicReceipt | null
   return stored ? (JSON.parse(stored) as PublicReceipt) : await receiptFromBackup(env, code);
 }
 
+/** Estado del pedido por encargo de un recibo, para mostrarlo en la página del recibo. */
+async function trackingSummary(env: Env, receipt: PublicReceipt): Promise<ReceiptTracking | undefined> {
+  if (!receipt.trackingCode || receipt.status === 'void') return undefined;
+  try {
+    const t = await findTracking(env, receipt.trackingCode);
+    if (!t) return undefined;
+    const events = [...t.events].sort((a, b) => b.date.localeCompare(a.date));
+    const stage = events[0]?.stage ?? 'confirmed';
+    return {
+      code: t.code,
+      label: STAGE_LABEL[stage],
+      issue: stage === 'issue',
+      delivered: stage === 'delivered',
+      city: events.find((e) => e.city)?.city,
+      date: events[0]?.date,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 /** GET /verificar/<código>: la página que abre el QR del recibo. */
 async function receiptPage(env: Env, rawCode: string): Promise<Response> {
   const code = decodeURIComponent(rawCode).trim().toUpperCase().slice(0, 32);
@@ -425,7 +454,7 @@ async function receiptPage(env: Env, rawCode: string): Promise<Response> {
     try {
       const receipt = await findReceipt(env, code);
       if (receipt && !receipt.phone) receipt.phone = (await env.BACKUPS.get(CONTACT_KEY, 'text')) || undefined;
-      state = receipt ? { kind: 'receipt', receipt } : { kind: 'not_found', code };
+      state = receipt ? { kind: 'receipt', receipt, tracking: await trackingSummary(env, receipt) } : { kind: 'not_found', code };
     } catch {
       state = { kind: 'error', code };
     }
