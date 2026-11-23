@@ -171,7 +171,8 @@
       "bluetoothOffHint": "Bluetooth is off. Turn it on and try again."
     },
     "shipping": "Shipping",
-    "verify": "Scan to view your purchase online"
+    "verify": "Scan to view your purchase online",
+    "verifyTracking": "Scan to see your purchase and track your order"
   },
   "permissions": {
     "create_transaction": {

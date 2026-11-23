@@ -45,7 +45,7 @@
     "stockEnabledHint": "El stock se controla automáticamente y se limita al cobrar.",
     "stockDisabledHint": "El producto siempre está disponible; el stock no se controla (p. ej. servicios o productos por encargo).",
     "preorderLabel": "Se vende por encargo",
-    "preorderHint": "Puedes cobrarlo aunque no haya existencias. Lo vendido sin stock queda como «por entregar» y se salda cuando recibes la compra.",
+    "preorderHint": "Puedes cobrarlo aunque no haya existencias. Lo vendido sin stock queda como «por entregar» y se salda cuando recibes la compra. Al venderlo se crea su seguimiento y el QR del recibo lleva al cliente a él.",
     "unitLabel": "Unidad",
     "barcodeLabel": "Código de barras",
     "barcodePlaceholder": "Opcional",

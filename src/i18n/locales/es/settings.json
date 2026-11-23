@@ -1020,6 +1020,7 @@
     "shipping": "Envío",
     "verifyAlt": "QR para ver la compra en línea",
     "verifyHint": "Escanea para ver tu compra en línea",
+    "verifyHintTracking": "Escanea para ver tu compra y seguir tu pedido",
     "verifyNoUrl": "Para que el recibo lleve QR, configura la dirección pública en Ajustes → Recibo."
   },
   "users": {

@@ -46,6 +46,7 @@ export interface PublicReceipt {
   shippingFee?: number;
   items: { name: string; quantity: number; subtotal: number }[];
   status?: 'valid' | 'void';
+  trackingCode?: string; // pedido por encargo: la página del recibo enlaza su seguimiento
 }
 
 export function toPublicReceipt(
@@ -53,6 +54,7 @@ export function toPublicReceipt(
   items: TransactionItemRecord[],
   storeName: string,
   phone?: string,
+  trackingCode?: string,
 ): PublicReceipt | null {
   if (!tx.verifyCode) return null;
   return {
@@ -65,6 +67,7 @@ export function toPublicReceipt(
     shippingFee: tx.shippingFee || undefined,
     items: items.map((i) => ({ name: i.productName, quantity: i.quantity, subtotal: i.subtotal })),
     status: 'valid',
+    trackingCode,
   };
 }
 

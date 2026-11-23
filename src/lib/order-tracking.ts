@@ -1,4 +1,4 @@
-import type { OrderTracking, StoreSettings, TrackingEvent, TrackingStage } from '@/lib/db';
+import { db, type OrderTracking, type Product, type StoreSettings, type Transaction, type TransactionItemRecord, type TrackingEvent, type TrackingStage } from '@/lib/db';
 import { getCloudKey } from '@/lib/cloud-backup';
 import { generateVerifyCode, getVerifyBaseUrl } from '@/lib/receipt-verify';
 
@@ -133,5 +133,76 @@ export async function unpublishTracking(code: string): Promise<void> {
     });
   } catch {
     // sin conexión
+  }
+}
+
+/** Productos de la venta que se piden por encargo (los locales no llevan seguimiento). */
+export function preorderItems(
+  items: Pick<TransactionItemRecord, 'productId' | 'productName' | 'quantity'>[],
+  products: Pick<Product, 'id' | 'preorder'>[],
+): { name: string; quantity: number }[] {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return items.filter((i) => byId.get(i.productId)?.preorder).map((i) => ({ name: i.productName, quantity: i.quantity }));
+}
+
+/** Título del pedido: el primer producto y cuántos más. */
+export function titleForItems(items: { name: string }[]): string {
+  if (!items.length) return '';
+  return items.length === 1 ? items[0].name : `${items[0].name} + ${items.length - 1}`;
+}
+
+/**
+ * Al cobrar una venta: si lleva productos por encargo crea su seguimiento (o
+ * actualiza el que ya tenía esa venta) y lo publica. Devuelve el código, que
+ * va en el recibo para que su QR lleve también al seguimiento. Una venta solo
+ * con productos locales no tiene seguimiento.
+ */
+export async function syncSaleTracking(
+  tx: Transaction & { id: number },
+  items: TransactionItemRecord[],
+  settings: Pick<StoreSettings, 'storeName' | 'phone'> | undefined,
+): Promise<string | undefined> {
+  const products = await db.products.bulkGet(items.map((i) => i.productId));
+  const ordered = preorderItems(items, products.filter((p): p is Product => !!p));
+  const existing = await db.orderTrackings.where('transactionId').equals(tx.id).first();
+  if (!ordered.length) return undefined;
+
+  const customer = tx.customerId ? await db.customers.get(tx.customerId) : undefined;
+  const paid = tx.total - (tx.debtAmount ?? 0);
+  const base = {
+    items: ordered,
+    customerId: tx.customerId,
+    customerName: tx.customerName,
+    customerPhone: customer?.phone || undefined,
+    amountPaid: paid > 0 ? paid : undefined,
+    prepaid: !(tx.debtAmount && tx.debtAmount > 0),
+  };
+  let order: OrderTracking;
+  if (existing?.id) {
+    await db.orderTrackings.update(existing.id, base);
+    order = { ...existing, ...base };
+  } else {
+    order = {
+      ...base,
+      code: newTrackingCode(),
+      title: titleForItems(ordered),
+      transactionId: tx.id,
+      status: 'confirmed',
+      events: [{ id: newEventId(), stage: 'confirmed', date: new Date().toISOString() }],
+      createdAt: new Date(),
+    };
+    order.id = (await db.orderTrackings.add(order)) as number;
+  }
+  void publishTracking(toPublicTracking(order, settings?.storeName || 'SD Tech Imports', settings?.phone));
+  return order.code;
+}
+
+/** Al borrar una venta se borra también su seguimiento. */
+export async function removeSaleTracking(transactionId: number): Promise<void> {
+  const linked = await db.orderTrackings.where('transactionId').equals(transactionId).toArray();
+  for (const o of linked) {
+    await db.orderTrackings.delete(o.id!);
+    await db.deletedRecords.add({ tableName: 'orderTrackings', recordId: o.id!, deletedAt: new Date(), syncedAt: null });
+    void unpublishTracking(o.code);
   }
 }

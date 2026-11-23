@@ -28,6 +28,7 @@ import { getDateLocale } from '@/i18n';
 import { formatCurrency } from '@/lib/currency';
 import { whatsappNumber, whatsappUserUrl } from '@/lib/customer-account';
 import { cn } from '@/lib/utils';
+import { registerReceipt, toPublicReceipt } from '@/lib/receipt-verify';
 import {
   TRACKING_STAGES, PROGRESS_STAGES, currentStage, currentCity, sortEvents, trackingProgress, trackingUrl,
   newTrackingCode, newEventId, toPublicTracking, publishTracking, unpublishTracking,
@@ -83,9 +84,11 @@ export default function OrderTrackingPage() {
     async () => {
       if (!customerId) return [];
       const all = await db.transactions.filter((tx) => tx.customerId === customerId && tx.status === 'completed').toArray();
-      return all.sort((a, b) => +new Date(b.date) - +new Date(a.date)).slice(0, 20);
+      // Las ventas que ya tienen su seguimiento (p. ej. las de productos por encargo) no se ofrecen otra vez.
+      const tracked = new Set((await db.orderTrackings.toArray()).filter((o) => o.id !== editing?.id).map((o) => o.transactionId));
+      return all.filter((tx) => !tracked.has(tx.id)).sort((a, b) => +new Date(b.date) - +new Date(a.date)).slice(0, 20);
     },
-    [customerId],
+    [customerId, editing?.id],
   );
 
   const viewing = orders?.find((o) => o.id === viewId) ?? null;
@@ -187,6 +190,12 @@ export default function OrderTrackingPage() {
     }
     setFormOpen(false);
     await publish(saved);
+    // El QR del recibo de esa venta también lleva al seguimiento.
+    if (txId) {
+      const tx = await db.transactions.get(txId);
+      const txItems = await db.transactionItems.where('transactionId').equals(txId).toArray();
+      if (tx) void registerReceipt(toPublicReceipt(tx, txItems, storeName, settings?.phone, saved.code));
+    }
   };
 
   const prepareUpdate = (o: OrderTracking) => {

@@ -19,8 +19,18 @@ export interface ReceiptPageData {
   status?: 'valid' | 'void';
 }
 
+/** Resumen del seguimiento cuando la compra incluye productos por encargo. */
+export interface ReceiptTracking {
+  code: string;
+  label: string; // etapa actual, p. ej. "En aduanas"
+  issue?: boolean;
+  delivered?: boolean;
+  city?: string;
+  date?: string; // ISO de la última actualización
+}
+
 export type ReceiptPageState =
-  | { kind: 'receipt'; receipt: ReceiptPageData }
+  | { kind: 'receipt'; receipt: ReceiptPageData; tracking?: ReceiptTracking }
   | { kind: 'not_found'; code: string }
   | { kind: 'error'; code: string };
 
@@ -106,6 +116,11 @@ h1 .c{color:var(--cyan)}
 .note{color:var(--muted);font-size:13px;text-align:center;margin:14px 0 0}
 .panel{margin:28px 0 0;padding:22px;border:1px solid var(--line);border-radius:18px;background:rgba(6,28,69,.55)}
 .panel p{margin:0;color:var(--muted)}
+.track{margin:22px 0 0;padding:20px;border:1px solid var(--cyan);border-radius:18px;background:rgba(0,189,232,.08)}
+.track .mono{margin:0 0 6px}
+.track h2{margin:0;font-size:22px;line-height:1.2;letter-spacing:-.01em}
+.track h2.issue{color:var(--danger)}
+.track p.sub2{margin:4px 0 14px;color:var(--muted);font-size:14px}
 footer{margin:44px 0 0;border-top:1px solid var(--line);padding:22px 0 34px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 footer img{height:22px;width:auto;display:block;opacity:.9}
 footer p{margin:0;font-size:12px;color:var(--muted)}
@@ -148,7 +163,19 @@ ${body}
 </html>`;
 }
 
-function receiptBody(r: ReceiptPageData): string {
+function trackingBlock(t: ReceiptTracking): string {
+  const when = t.date ? formatReceiptDate(t.date) : '';
+  const detail = [t.city, when && `actualizado ${when}`].filter(Boolean).join(' · ');
+  return `
+<section class="track" aria-label="Seguimiento del pedido">
+<p class="mono">Tu pedido por encargo</p>
+<h2${t.issue ? ' class="issue"' : ''}>${esc(t.label)}</h2>
+${detail ? `<p class="sub2">${esc(detail)}</p>` : '<p class="sub2"></p>'}
+<a class="btn primary" href="/seguimiento/${esc(t.code)}">${t.delivered ? 'Ver el historial del pedido' : 'Seguir mi pedido'}</a>
+</section>`;
+}
+
+function receiptBody(r: ReceiptPageData, tracking?: ReceiptTracking): string {
   const voided = r.status === 'void';
   const date = formatReceiptDate(r.date);
   const wa = whatsappNumber(r.phone);
@@ -163,6 +190,7 @@ function receiptBody(r: ReceiptPageData): string {
 <h1>${voided ? 'Este recibo<br><span class="c">fue anulado.</span>' : `Gracias por tu<br><span class="c">compra.</span>`}</h1>
 <p class="lead">${voided ? `La tienda anuló esta venta. Si tienes dudas, escríbele a ${esc(r.store)}.` : `Esta es la copia digital de tu recibo de ${esc(r.store)}.`}</p>
 <span class="pill${voided ? ' void' : ''}"><i></i>${voided ? 'Recibo anulado' : 'Compra registrada'}</span>
+${tracking && !voided ? trackingBlock(tracking) : ''}
 <article class="ticket${voided ? ' void' : ''}" aria-label="Recibo">
 <img class="logo" src="/recibo/sdtech-imports.png" alt="${esc(r.store)}" width="180" height="68">
 <p class="store">${esc(r.store)}</p>
@@ -196,7 +224,7 @@ ${code ? `<p class="note mono">Código ${esc(code)}</p>` : ''}`;
 export function renderReceiptPage(state: ReceiptPageState): { html: string; status: number } {
   if (state.kind === 'receipt') {
     const r = state.receipt;
-    return { html: shell(`Recibo ${r.receiptNumber} · ${r.store}`, receiptBody(r)), status: 200 };
+    return { html: shell(`Recibo ${r.receiptNumber} · ${r.store}`, receiptBody(r, state.tracking)), status: 200 };
   }
   if (state.kind === 'not_found') {
     return {

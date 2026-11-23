@@ -45,7 +45,7 @@
     "stockEnabledHint": "Stock is tracked automatically & limited during checkout.",
     "stockDisabledHint": "Product always available, stock is not tracked (e.g. services, made-to-order items).",
     "preorderLabel": "Sold to order",
-    "preorderHint": "You can charge for it even when it is out of stock. Units sold without stock show as “to deliver” and are settled when the purchase arrives.",
+    "preorderHint": "You can charge for it even when it is out of stock. Units sold without stock show as “to deliver” and are settled when the purchase arrives. Selling it creates an order tracking page that the receipt QR links to.",
     "unitLabel": "Unit",
     "barcodeLabel": "Barcode",
     "barcodePlaceholder": "Optional",

@@ -890,6 +890,11 @@ class PosDatabase extends Dexie {
     this.version(17).stores({
       orderTrackings: '++id, &code, status, customerId, createdAt, updatedAt',
     });
+
+    // Version 18 - El seguimiento se busca por la venta (pedidos por encargo cobrados en la caja)
+    this.version(18).stores({
+      orderTrackings: '++id, &code, status, customerId, transactionId, createdAt, updatedAt',
+    });
   }
 }
 
