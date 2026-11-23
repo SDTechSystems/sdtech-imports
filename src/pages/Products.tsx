@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import ProductThumb from '@/components/ProductThumb';
-import { db, isStockManaged, type Product, type Category } from '@/lib/db';
+import { db, isStockManaged, pendingDelivery, type Product, type Category } from '@/lib/db';
 import { useState, useRef } from 'react';
 import { Plus, Search, Edit2, Trash2, Package as PackageIcon, Camera, X, Copy, Infinity as InfinityIcon, ScanLine, Upload, Download, AlertTriangle, CheckCircle2, XCircle, Loader2, FileSpreadsheet, Home as HomeIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,6 +76,7 @@ export default function Produk() {
   const [hpp, setHpp] = useState('');
   const [stock, setStock] = useState('');
   const [trackStock, setTrackStock] = useState(true);
+  const [preorder, setPreorder] = useState(false);
   const [unit, setUnit] = useState('pcs');
   const [barcode, setBarcode] = useState('');
   const [description, setDescription] = useState('');
@@ -115,13 +116,13 @@ export default function Produk() {
       return;
     }
     setEditProduct(null);
-    setName(''); setSku(''); setCategoryId(categories[0]?.id?.toString() ?? ''); setPrice(''); setHpp(''); setStock(''); setTrackStock(true); setUnit('pcs'); setBarcode(''); setDescription(''); setPhoto(undefined);
+    setName(''); setSku(''); setCategoryId(categories[0]?.id?.toString() ?? ''); setPrice(''); setHpp(''); setStock(''); setTrackStock(true); setPreorder(false); setUnit('pcs'); setBarcode(''); setDescription(''); setPhoto(undefined);
     setDialogOpen(true);
   };
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
-    setName(p.name); setSku(p.sku); setCategoryId(p.categoryId.toString()); setPrice(p.price.toString()); setHpp(p.hpp.toString()); setStock(p.stock.toString()); setTrackStock(isStockManaged(p)); setUnit(p.unit); setBarcode(p.barcode ?? ''); setDescription(p.description ?? ''); setPhoto(p.photo);
+    setName(p.name); setSku(p.sku); setCategoryId(p.categoryId.toString()); setPrice(p.price.toString()); setHpp(p.hpp.toString()); setStock(p.stock.toString()); setTrackStock(isStockManaged(p)); setPreorder(!!p.preorder); setUnit(p.unit); setBarcode(p.barcode ?? ''); setDescription(p.description ?? ''); setPhoto(p.photo);
     setDialogOpen(true);
   };
 
@@ -164,6 +165,7 @@ export default function Produk() {
       hpp: Number(hpp) || 0,
       stock: Number(stock) || 0,
       trackStock,
+      preorder: trackStock && preorder,
       unit: unit.trim() || 'pcs',
       description: description.trim() || undefined,
       barcode: barcode.trim() || undefined,
@@ -663,6 +665,15 @@ export default function Produk() {
                           {t('card.stock')}: {p.stock} {p.unit}
                         </span>
                       ) : null}
+                      {pendingDelivery(p) > 0 ? (
+                        <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                          {t('card.pendingDelivery', { count: pendingDelivery(p), unit: p.unit })}
+                        </span>
+                      ) : p.preorder && isStockManaged(p) ? (
+                        <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                          {t('card.preorder')}
+                        </span>
+                      ) : null}
                       {(inTransit?.get(p.id!) ?? 0) > 0 ? (
                         <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center gap-1">
                           <Plane className="w-3 h-3" />
@@ -817,6 +828,15 @@ export default function Produk() {
               </div>
               <Switch checked={trackStock} onCheckedChange={setTrackStock} />
             </div>
+            {trackStock && (
+              <div className="flex items-center justify-between rounded-xl border border-border p-3">
+                <div className="space-y-0.5 pr-3">
+                  <Label className="text-sm">{t('dialog.preorderLabel')}</Label>
+                  <p className="text-[11px] text-muted-foreground leading-snug">{t('dialog.preorderHint')}</p>
+                </div>
+                <Switch checked={preorder} onCheckedChange={setPreorder} />
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               {trackStock && (
                 <div className="space-y-1.5">

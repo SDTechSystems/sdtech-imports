@@ -16,7 +16,9 @@
     "hpp": "COGS",
     "stock": "Stock",
     "stockUnmanaged": "Stock not managed",
-    "inTransit": "+{{qty}} on the way"
+    "inTransit": "+{{qty}} on the way",
+    "pendingDelivery": "{{count}} {{unit}} to deliver",
+    "preorder": "Made to order"
   },
   "dialog": {
     "titleEdit": "Edit Product",
@@ -42,6 +44,8 @@
     "manageStockLabel": "Manage Stock",
     "stockEnabledHint": "Stock is tracked automatically & limited during checkout.",
     "stockDisabledHint": "Product always available, stock is not tracked (e.g. services, made-to-order items).",
+    "preorderLabel": "Sold to order",
+    "preorderHint": "You can charge for it even when it is out of stock. Units sold without stock show as “to deliver” and are settled when the purchase arrives.",
     "unitLabel": "Unit",
     "barcodeLabel": "Barcode",
     "barcodePlaceholder": "Optional",

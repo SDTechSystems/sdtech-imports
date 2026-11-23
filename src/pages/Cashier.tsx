@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import ProductThumb from '@/components/ProductThumb';
-import { db, isStockManaged, type Product, type Category, type Transaction, type TransactionItemRecord } from '@/lib/db';
+import { db, isStockManaged, canSell, pendingDelivery, type Product, type Category, type Transaction, type TransactionItemRecord } from '@/lib/db';
 import { useState, useRef, useEffect } from 'react';
 import { Search, Plus, Minus, ShoppingCart, X, Percent, Tag, CreditCard, Banknote, Check, ScanBarcode, Package as PackageIcon, ClipboardList, Save, Pencil, User, Hash, Trash2, Barcode, Printer } from 'lucide-react';
 import Receipt from '@/components/Receipt';
@@ -145,7 +145,7 @@ export default function Kasir() {
   const filtered = products?.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchCategory = filterCategory === 'all' || p.categoryId === Number(filterCategory);
-    const available = !isStockManaged(p) || p.stock > 0 || cartProductIds.has(p.id!);
+    const available = canSell(p, 1) || cartProductIds.has(p.id!);
     return matchSearch && matchCategory && available;
   }) ?? [];
 
@@ -172,7 +172,7 @@ export default function Kasir() {
     setCart(prev => {
       const existing = prev.find(c => c.product.id === product.id);
       if (existing) {
-        if (isStockManaged(product) && existing.qty >= product.stock) {
+        if (!canSell(product, existing.qty + 1)) {
           toast.error(t('cashier.toast.stockLow'));
           return prev;
         }
@@ -187,7 +187,7 @@ export default function Kasir() {
       if (c.product.id !== productId) return c;
       const newQty = c.qty + delta;
       if (newQty <= 0) return c;
-      if (isStockManaged(c.product) && newQty > c.product.stock) { toast.error(t('cashier.toast.stockLow')); return c; }
+      if (!canSell(c.product, newQty)) { toast.error(t('cashier.toast.stockLow')); return c; }
       return { ...c, qty: newQty };
     }));
   };
@@ -661,7 +661,7 @@ export default function Kasir() {
     setScannerOpen(false);
     const product = products?.find(p => p.sku === barcode || p.barcode === barcode);
     if (product) {
-      if (isStockManaged(product) && product.stock <= 0) {
+      if (!canSell(product, 1)) {
         toast.error(t('cashier.toast.productOutOfStock', { name: product.name }));
         return;
       }
@@ -678,7 +678,7 @@ export default function Kasir() {
       setScanInput('');
       const product = products?.find(p => p.sku === code || p.barcode === code);
       if (product) {
-        if (isStockManaged(product) && product.stock <= 0) {
+        if (!canSell(product, 1)) {
           toast.error(t('cashier.toast.productOutOfStock', { name: product.name }));
           return;
         }
@@ -842,7 +842,7 @@ export default function Kasir() {
                     )}
                     <div className="flex justify-between items-center mt-1">
                       {isStockManaged(p) ? (
-                        <p className="text-[10px] text-muted-foreground">{t('cashier.productCard.stock', { stock: p.stock, unit: p.unit })}</p>
+                        <StockLine product={p} t={t} />
                       ) : (
                         <p className="text-[10px] text-primary">{t('cashier.productCard.alwaysAvailable')}</p>
                       )}
@@ -869,7 +869,7 @@ export default function Kasir() {
                       </p>
                     )}
                     {isStockManaged(p) ? (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{t('cashier.productCard.stock', { stock: p.stock, unit: p.unit })}</p>
+                      <StockLine product={p} t={t} className="mt-0.5" />
                     ) : (
                       <p className="text-[10px] text-primary mt-0.5">{t('cashier.productCard.alwaysAvailable')}</p>
                     )}
@@ -1801,4 +1801,19 @@ export default function Kasir() {
       </AlertDialog>
     </div>
   );
+}
+
+/** Existencias en la tarjeta del producto; los productos por encargo sin stock dicen cuántos faltan por entregar. */
+function StockLine({ product, t, className }: { product: Product; t: (key: string, opts?: Record<string, unknown>) => string; className?: string }) {
+  if (product.preorder && product.stock <= 0) {
+    const pending = pendingDelivery(product);
+    return (
+      <p className={cn('text-[10px] text-amber-700 dark:text-amber-400', className)}>
+        {pending > 0
+          ? t('cashier.productCard.preorderPending', { count: pending, unit: product.unit })
+          : t('cashier.productCard.preorder')}
+      </p>
+    );
+  }
+  return <p className={cn('text-[10px] text-muted-foreground', className)}>{t('cashier.productCard.stock', { stock: product.stock, unit: product.unit })}</p>;
 }

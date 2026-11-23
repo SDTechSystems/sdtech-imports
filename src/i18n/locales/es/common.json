@@ -71,6 +71,11 @@
     "skip": "Omitir"
   },
   "whatsNewFeatures": {
+    "2026-11-preorder": {
+      "title": "Ventas por encargo",
+      "description": "Marca un producto como «Se vende por encargo» y podrás cobrarlo en la caja aunque no tengas existencias. Lo que vendas así queda como «por entregar» hasta que recibas la compra.",
+      "ctaLabel": "Ver productos"
+    },
     "2026-11-imports": {
       "title": "Compras en dólares y pedidos en camino",
       "description": "Registra tus compras de Amazon en dólares: la app las pasa a pesos con el dólar del día (o la tasa a la que compraste en Morse) y les suma el envío. Lo que sigue en tránsito aparece en el inicio hasta que lo marques como recibido.",
