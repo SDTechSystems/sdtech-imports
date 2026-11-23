@@ -54,3 +54,4 @@ knowledge/
 # Cloudflare Wrangler
 .wrangler
 .dev.vars*
+inventario-carga/
