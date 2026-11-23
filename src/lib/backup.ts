@@ -159,7 +159,7 @@ export async function restoreFromBackupData(data: unknown): Promise<void> {
       await db.units.bulkAdd(data.units);
     } else {
       const now = new Date();
-      const defaults = ['pcs', 'kg', 'gram', 'liter', 'ml', 'porción', 'vaso', 'botella', 'paquete'];
+      const defaults = ['pcs', 'kg', 'gram', 'liter', 'ml', 'rollo', 'caja', 'par', 'paquete'];
       const seen = new Set<string>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const toAdd: any[] = [];

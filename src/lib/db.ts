@@ -977,9 +977,9 @@ export async function seedDefaultData() {
       { name: 'gram',    isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
       { name: 'liter',   isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
       { name: 'ml',      isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'porción', isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'vaso',    isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'botella', isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'rollo',   isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'caja',    isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'par',     isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
       { name: 'paquete', isDefault: 1, createdAt: now, isDeleted: 0, deletedAt: null },
     ]);
   }

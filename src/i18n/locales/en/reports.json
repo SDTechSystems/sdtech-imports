@@ -158,7 +158,7 @@
       "date": "Date",
       "time": "Time",
       "customer": "Customer",
-      "table": "Table",
+      "table": "Reference",
       "paymentMethod": "Payment Method",
       "paid": "Paid",
       "initialDebt": "Initial Debt",

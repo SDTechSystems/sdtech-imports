@@ -6,6 +6,10 @@
  *   POST   /api/receipts         registra un recibo para su QR (requiere clave)
  *   DELETE /api/receipts/<cód>   marca un recibo como anulado (requiere clave)
  *   GET    /api/verify/<cód>     verifica un recibo, pública
+ *   GET    /verificar/<cód>      página del recibo para el cliente (HTML), pública
+ *
+ * En recibos.sdtechsystems.dev solo se sirve la página del recibo: la app de
+ * caja y la API de copias siguen en la dirección workers.dev.
  *
  * Copias de seguridad:
  *
@@ -31,6 +35,11 @@ interface KVNamespace {
     cursor?: string;
   }>;
 }
+
+import { renderReceiptPage, RECEIPT_PAGE_HEADERS, BRAND_SITE, type ReceiptPageState } from './receipt-page';
+
+/** Dominio público de los recibos (QR). */
+const RECEIPTS_HOST = 'recibos.sdtechsystems.dev';
 
 interface Env {
   BACKUPS: KVNamespace;
@@ -148,11 +157,14 @@ interface PublicReceipt {
   receiptNumber: string;
   date: string;
   store: string;
+  phone?: string;
   total: number;
   shippingFee?: number;
   items: { name: string; quantity: number; subtotal: number }[];
   status?: 'valid' | 'void';
 }
+
+const CONTACT_KEY = 'store:contact';
 
 const CODE_RE = /^[2-9A-HJ-NP-Z]{8,16}$/;
 const MAX_RECEIPT = 32 * 1024;
@@ -169,6 +181,7 @@ function cleanReceipt(raw: unknown): PublicReceipt | null {
     receiptNumber: text(r.receiptNumber, 40),
     date: text(r.date, 40),
     store: text(r.store, 80),
+    phone: r.phone ? text(r.phone, 30) : undefined,
     total: num(r.total),
     shippingFee: r.shippingFee ? num(r.shippingFee) : undefined,
     items: r.items.slice(0, 200).map((i) => {
@@ -187,7 +200,7 @@ async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt 
   if (!raw.includes(code)) return null;
   type Tx = { id?: number; verifyCode?: string; receiptNumber?: string; date?: string; total?: number; shippingFee?: number; status?: string };
   type Item = { transactionId?: number; productName?: string; quantity?: number; subtotal?: number };
-  const data = JSON.parse(raw) as { transactions?: Tx[]; transactionItems?: Item[]; storeSettings?: { storeName?: string }[] };
+  const data = JSON.parse(raw) as { transactions?: Tx[]; transactionItems?: Item[]; storeSettings?: { storeName?: string; phone?: string }[] };
   const tx = data.transactions?.find((t) => t.verifyCode === code && t.status === 'completed');
   if (!tx) return null;
   const items = (data.transactionItems || []).filter((i) => i.transactionId === tx.id);
@@ -196,6 +209,7 @@ async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt 
     receiptNumber: tx.receiptNumber,
     date: tx.date,
     store: data.storeSettings?.[0]?.storeName || 'SD Tech Imports',
+    phone: data.storeSettings?.[0]?.phone,
     total: tx.total,
     shippingFee: tx.shippingFee,
     items: items.map((i) => ({ name: i.productName, quantity: i.quantity, subtotal: i.subtotal })),
@@ -236,6 +250,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     }
     if (!receipt) return json({ error: 'invalid_receipt' }, 400);
     await env.BACKUPS.put(`receipt:${receipt.code}`, JSON.stringify({ ...receipt, status: 'valid' }));
+    // El teléfono más reciente de la tienda, para los recibos que no lo traen.
+    if (receipt.phone) await env.BACKUPS.put(CONTACT_KEY, receipt.phone);
     return json({ ok: true });
   }
 
@@ -326,9 +342,56 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   return json({ error: 'not_found' }, 404);
 }
 
+async function findReceipt(env: Env, code: string): Promise<PublicReceipt | null> {
+  const stored = await env.BACKUPS.get(`receipt:${code}`, 'text');
+  return stored ? (JSON.parse(stored) as PublicReceipt) : await receiptFromBackup(env, code);
+}
+
+/** GET /verificar/<código>: la página que abre el QR del recibo. */
+async function receiptPage(env: Env, rawCode: string): Promise<Response> {
+  const code = decodeURIComponent(rawCode).trim().toUpperCase().slice(0, 32);
+  let state: ReceiptPageState;
+  if (!CODE_RE.test(code)) {
+    state = { kind: 'not_found', code };
+  } else if (!env.BACKUPS) {
+    state = { kind: 'error', code };
+  } else {
+    try {
+      const receipt = await findReceipt(env, code);
+      if (receipt && !receipt.phone) receipt.phone = (await env.BACKUPS.get(CONTACT_KEY, 'text')) || undefined;
+      state = receipt ? { kind: 'receipt', receipt } : { kind: 'not_found', code };
+    } catch {
+      state = { kind: 'error', code };
+    }
+  }
+  const { html, status } = renderReceiptPage(state);
+  return new Response(html, { status, headers: RECEIPT_PAGE_HEADERS });
+}
+
+/** Lo que se puede abrir en el dominio de recibos: la página, sus recursos y la verificación. */
+function allowedOnReceiptsHost(path: string): boolean {
+  return (
+    path.startsWith('/verificar/') ||
+    path.startsWith('/recibo/') ||
+    path.startsWith('/api/verify/') ||
+    path === '/favicon.ico' ||
+    path === '/robots.txt'
+  );
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.hostname === RECEIPTS_HOST && !allowedOnReceiptsHost(url.pathname)) {
+      if (url.pathname === '/') return Response.redirect(BRAND_SITE, 302);
+      const { html } = renderReceiptPage({ kind: 'not_found', code: '' });
+      return new Response(html, { status: 404, headers: RECEIPT_PAGE_HEADERS });
+    }
+
+    const page = url.pathname.match(/^\/verificar\/([^/]+)\/?$/);
+    if (page && (request.method === 'GET' || request.method === 'HEAD')) return receiptPage(env, page[1]);
+
     if (url.pathname.startsWith('/api/')) {
       try {
         return await handleApi(request, env, url);

@@ -246,7 +246,7 @@
       "payment": "Pago",
       "cashier": "Cajero",
       "customer": "Cliente",
-      "table": "Mesa {{number}}",
+      "table": "Ref. {{number}}",
       "notes": "Notas",
       "items": "Artículos",
       "quantityFormat": "{{qty}} × {{price}}",
@@ -790,7 +790,7 @@
       "addTitle": "Agregar unidad",
       "editTitle": "Editar unidad",
       "nameLabel": "Nombre de la unidad",
-      "namePlaceholder": "p. ej. paquete, docena, plato",
+      "namePlaceholder": "p. ej. paquete, caja, rollo",
       "save": "Guardar",
       "renameHint": "Todos los productos que usan \"{{old}}\" se renombrarán automáticamente a \"{{new}}\"."
     },
@@ -855,9 +855,7 @@
     },
     "buttons": {
       "saveBill": "Guardar cuenta",
-      "saveAndPrintKitchen": "Guardar e imprimir comanda",
       "saveOnly": "Solo guardar",
-      "printKitchen": "Imprimir comanda",
       "pay": "Cobrar",
       "cancelBill": "Cancelar esta cuenta",
       "ok": "Aceptar",
@@ -876,7 +874,7 @@
       "amountPlaceholder": "Ingresa el monto del pago...",
       "exactMoney": "Monto exacto",
       "reset": "Restablecer",
-      "table": "Mesa",
+      "table": "Referencia",
       "notes": "Notas adicionales (opcional)",
       "remainingDebt": "Deuda pendiente",
       "remainingDebtHint": "Debes seleccionar el cliente de la lista",
@@ -934,11 +932,7 @@
       "empty": "No hay cuentas abiertas",
       "continue": "Continuar",
       "cancel": "Cancelar",
-      "tablePrefix": "Mesa {{number}}"
-    },
-    "saveConfirmDialog": {
-      "title": "Guardar cuenta",
-      "description": "¿Deseas imprimir una comanda después de guardar esta cuenta?"
+      "tablePrefix": "Ref. {{number}}"
     },
     "cancelDialog": {
       "title": "¿Cancelar cuenta?",
@@ -990,7 +984,7 @@
     "no": "N.º",
     "cashierLabel": "Cajero",
     "customerLabel": "Cliente",
-    "tableLabel": "Mesa",
+    "tableLabel": "Referencia",
     "notesLabel": "Notas",
     "discountLabel": "Descuento",
     "subtotal": "Subtotal",
@@ -1003,7 +997,6 @@
     "download": "Descargar",
     "share": "Compartir",
     "print": "Imprimir",
-    "printKitchen": "Imprimir comanda",
     "watermarkLine1": "Impreso desde",
     "watermarkLine2": "la app SD Tech Imports",
     "done": "Listo",
@@ -1020,8 +1013,8 @@
     "shareText": "Recibo de {{storeName}}",
     "whatsappFallback": "*{{storeName}}*\nRecibo: {{receiptNumber}}\nTotal: {{total}}\nFecha: {{date}}",
     "shipping": "Envío",
-    "verifyAlt": "QR para verificar el recibo",
-    "verifyHint": "Escanea para verificar que este recibo es auténtico",
+    "verifyAlt": "QR para ver la compra en línea",
+    "verifyHint": "Escanea para ver tu compra en línea",
     "verifyNoUrl": "Para que el recibo lleve QR, configura la dirección pública en Ajustes → Recibo."
   },
   "users": {
@@ -1203,12 +1196,8 @@
     "hideWatermarkDescActive": "Oculta la marca de agua \"Impreso desde la app SD Tech Imports\" en la parte inferior del recibo.",
     "saveSuccess": "Ajustes del recibo guardados correctamente",
     "saveFailed": "No se pudieron guardar los ajustes del recibo",
-    "verifyUrlLabel": "Dirección pública (QR de verificación)",
-    "verifyUrlDesc": "Cada recibo lleva un QR que abre esta dirección para comprobar que es auténtico. En el navegador se usa la dirección actual; en la app de Android escribe aquí la de tu Cloudflare."
-  },
-  "kitchenTicket": {
-    "title": "Comanda",
-    "done": "Listo"
+    "verifyUrlLabel": "Dirección del recibo en línea (QR)",
+    "verifyUrlDesc": "El QR de cada recibo abre recibos.sdtechsystems.dev, donde el cliente ve su compra. Déjalo vacío para usar esa dirección; cámbiala solo si publicas la app en otro dominio."
   },
   "cloudBackup": {
     "title": "Copia automática en la nube",

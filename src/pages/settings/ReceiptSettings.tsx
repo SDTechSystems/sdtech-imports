@@ -134,7 +134,7 @@ export default function ReceiptSettings() {
               id="verify-url-input"
               value={verifyBaseUrl}
               onChange={(e) => setVerifyBaseUrl(e.target.value)}
-              placeholder={getVerifyBaseUrl() || 'https://sdtech-imports.tu-cuenta.workers.dev'}
+              placeholder={getVerifyBaseUrl()}
               className="h-11"
               type="url"
               inputMode="url"

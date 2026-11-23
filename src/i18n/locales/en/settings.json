@@ -246,7 +246,7 @@
       "payment": "Payment",
       "cashier": "Cashier",
       "customer": "Customer",
-      "table": "Table {{number}}",
+      "table": "Ref. {{number}}",
       "notes": "Notes",
       "items": "Items",
       "quantityFormat": "{{qty}} × {{price}}",
@@ -790,7 +790,7 @@
       "addTitle": "Add Unit",
       "editTitle": "Edit Unit",
       "nameLabel": "Unit Name",
-      "namePlaceholder": "e.g. pack, dozen, bowl",
+      "namePlaceholder": "e.g. pack, box, roll",
       "save": "Save",
       "renameHint": "All products using \"{{old}}\" will be automatically renamed to \"{{new}}\"."
     },
@@ -855,9 +855,7 @@
     },
     "buttons": {
       "saveBill": "Save Bill",
-      "saveAndPrintKitchen": "Save & Print Kitchen Ticket",
       "saveOnly": "Save Only",
-      "printKitchen": "Print Kitchen Ticket",
       "pay": "Pay",
       "cancelBill": "Cancel This Bill",
       "ok": "OK",
@@ -876,7 +874,7 @@
       "amountPlaceholder": "Enter payment amount...",
       "exactMoney": "Exact Amount",
       "reset": "Reset",
-      "table": "Table",
+      "table": "Reference",
       "notes": "Additional notes (optional)",
       "remainingDebt": "Remaining Debt",
       "remainingDebtHint": "Customer must be selected from the list",
@@ -934,11 +932,7 @@
       "empty": "No open bills",
       "continue": "Continue",
       "cancel": "Cancel",
-      "tablePrefix": "Table {{number}}"
-    },
-    "saveConfirmDialog": {
-      "title": "Save Bill",
-      "description": "Would you like to print a Kitchen Ticket after saving this bill?"
+      "tablePrefix": "Ref. {{number}}"
     },
     "cancelDialog": {
       "title": "Cancel Bill?",
@@ -990,7 +984,7 @@
     "no": "No",
     "cashierLabel": "Cashier",
     "customerLabel": "Customer",
-    "tableLabel": "Table",
+    "tableLabel": "Reference",
     "notesLabel": "Notes",
     "discountLabel": "Discount",
     "subtotal": "Subtotal",
@@ -1003,7 +997,6 @@
     "download": "Download",
     "share": "Share",
     "print": "Print",
-    "printKitchen": "Print Kitchen",
     "watermarkLine1": "Printed From",
     "watermarkLine2": "SD Tech Imports App",
     "done": "Done",
@@ -1020,8 +1013,8 @@
     "shareText": "Receipt from {{storeName}}",
     "whatsappFallback": "*{{storeName}}*\nReceipt: {{receiptNumber}}\nTotal: {{total}}\nDate: {{date}}",
     "shipping": "Shipping",
-    "verifyAlt": "QR to verify the receipt",
-    "verifyHint": "Scan to verify this receipt is authentic",
+    "verifyAlt": "QR to view the purchase online",
+    "verifyHint": "Scan to view your purchase online",
     "verifyNoUrl": "To print a QR, set the public address in Settings → Receipt."
   },
   "users": {
@@ -1203,12 +1196,8 @@
     "hideWatermarkDescActive": "Hide the \"Printed From SD Tech Imports App\" watermark at the bottom of the receipt.",
     "saveSuccess": "Receipt settings saved successfully",
     "saveFailed": "Failed to save receipt settings",
-    "verifyUrlLabel": "Public address (verification QR)",
-    "verifyUrlDesc": "Each receipt carries a QR that opens this address to check it is authentic. In the browser the current address is used; in the Android app enter your Cloudflare address here."
-  },
-  "kitchenTicket": {
-    "title": "Kitchen Ticket",
-    "done": "Done"
+    "verifyUrlLabel": "Online receipt address (QR)",
+    "verifyUrlDesc": "Each receipt QR opens recibos.sdtechsystems.dev, where the customer sees the purchase. Leave it empty to use that address; change it only if you host the app on another domain."
   },
   "cloudBackup": {
     "title": "Automatic cloud backup",
