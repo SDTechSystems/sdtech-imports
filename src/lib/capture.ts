@@ -30,7 +30,7 @@ function inlineLoadedStyles(doc: Document) {
 }
 
 /**
- * Convierte un elemento en imagen (recibos, comandas, reportes).
+ * Convierte un elemento en imagen (recibos, reportes).
  *
  * html2canvas captura una copia de la página. En esa copia la animación de
  * apertura del diálogo (zoom de 95 % a 100 %) vuelve a empezar, y las líneas

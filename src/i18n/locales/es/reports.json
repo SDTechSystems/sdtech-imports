@@ -158,7 +158,7 @@
       "date": "Fecha",
       "time": "Hora",
       "customer": "Cliente",
-      "table": "Mesa",
+      "table": "Referencia",
       "paymentMethod": "Método de pago",
       "paid": "Pagado",
       "initialDebt": "Deuda inicial",

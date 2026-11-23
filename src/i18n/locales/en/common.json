@@ -122,7 +122,7 @@
     "time": "Time",
     "cashier": "Cashier",
     "customer": "Customer",
-    "table": "Table",
+    "table": "Reference",
     "notes": "Notes",
     "itemNote": "Note",
     "subtotal": "Subtotal",
@@ -134,7 +134,6 @@
     "thanks": "Thank you!",
     "watermarkLine1": "Printed From",
     "watermarkLine2": "SD Tech Imports App",
-    "kitchenTicket": "KITCHEN TICKET",
     "dailyTitle": "DAILY SALES REPORT",
     "period": "Period",
     "txCount": "Transactions",
@@ -167,7 +166,7 @@
       "bluetoothOffHint": "Bluetooth is off. Turn it on and try again."
     },
     "shipping": "Shipping",
-    "verify": "Scan to verify this receipt"
+    "verify": "Scan to view your purchase online"
   },
   "permissions": {
     "create_transaction": {

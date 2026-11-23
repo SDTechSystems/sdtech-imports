@@ -80,27 +80,27 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const seedDummyData = async () => {
     const now = new Date();
     const dummyProducts = [
-      { name: 'Arroz con pollo', sku: 'NG001', categoryId: 1, price: 15000, hpp: 8000, stock: 50, unit: 'porción', description: 'Arroz con pollo desmechado, maduro y ensalada', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Bandeja paisa', sku: 'MG001', categoryId: 1, price: 12000, hpp: 6000, stock: 40, unit: 'porción', description: 'Frijoles, arroz, carne molida, chicharrón, huevo y arepa', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Pollo asado', sku: 'AB001', categoryId: 1, price: 20000, hpp: 12000, stock: 30, unit: 'porción', description: 'Cuarto de pollo asado con papa y ensalada', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Empanadas (x5)', sku: 'SA001', categoryId: 1, price: 18000, hpp: 10000, stock: 25, unit: 'porción', description: '5 empanadas de carne con ají', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Sancocho', sku: 'BU001', categoryId: 1, price: 15000, hpp: 7000, stock: 35, unit: 'plato', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Limonada', sku: 'ET001', categoryId: 2, price: 5000, hpp: 1500, stock: 100, unit: 'vaso', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Jugo de naranja', sku: 'EJ001', categoryId: 2, price: 7000, hpp: 2500, stock: 80, unit: 'vaso', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Café con leche', sku: 'KS001', categoryId: 2, price: 10000, hpp: 4000, stock: 60, unit: 'vaso', description: 'Café con leche y panela', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Agua', sku: 'AM001', categoryId: 2, price: 4000, hpp: 2000, stock: 120, unit: 'botella', description: '600ml', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Servilletas', sku: 'TS001', categoryId: 3, price: 2000, hpp: 1000, stock: 200, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Papas de paquete', sku: 'KR001', categoryId: 3, price: 3000, hpp: 1500, stock: 150, unit: 'paquete', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Audífonos inalámbricos', sku: 'AUD-001', categoryId: 1, price: 120000, hpp: 70000, stock: 12, unit: 'pcs', description: 'Bluetooth 5.3, estuche de carga USB-C', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Cargador USB-C 30 W', sku: 'CAR-030', categoryId: 2, price: 56000, hpp: 31000, stock: 10, unit: 'pcs', description: 'Carga rápida, 3 puertos', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Cable USB-C 1 m', sku: 'CAB-001', categoryId: 2, price: 25000, hpp: 12000, stock: 30, unit: 'pcs', description: 'Trenzado, carga y datos', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Mouse inalámbrico', sku: 'MOU-001', categoryId: 1, price: 45000, hpp: 25000, stock: 15, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Teclado Bluetooth', sku: 'TEC-001', categoryId: 1, price: 89000, hpp: 52000, stock: 8, unit: 'pcs', description: 'Compatible con celular, tableta y computador', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Rollo de etiquetas 50x30 mm', sku: 'ROL-5030', categoryId: 3, price: 33000, hpp: 18500, stock: 24, unit: 'rollo', description: 'Etiqueta térmica blanca, 230 por rollo', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Impresora de etiquetas', sku: 'IMP-001', categoryId: 1, price: 149900, hpp: 89000, stock: 4, unit: 'pcs', description: 'Térmica, Bluetooth, hasta 50 mm de ancho', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Protector de pantalla', sku: 'PRO-001', categoryId: 2, price: 15000, hpp: 5000, stock: 40, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Batería externa 10.000 mAh', sku: 'BAT-010', categoryId: 2, price: 85000, hpp: 48000, stock: 9, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Soporte para celular', sku: 'SOP-001', categoryId: 2, price: 20000, hpp: 9000, stock: 20, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Memoria USB 64 GB', sku: 'USB-064', categoryId: 3, price: 35000, hpp: 18000, stock: 18, unit: 'pcs', createdAt: now, updatedAt: now, isDeleted: 0, deletedAt: null },
     ];
 
     const dummySuppliers = [
-      { name: 'Distribuidora Fresca S.A.S.', phone: '3011112233', address: 'Calle 15 # 8-20', notes: 'Proveedor de verduras y carnes', createdAt: now, isDeleted: 0, deletedAt: null },
-      { name: 'Bebidas del Valle', phone: '3022223344', address: 'Carrera 8 # 12-40', notes: 'Proveedor de bebidas', createdAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Amazon', phone: '', address: 'Estados Unidos', notes: 'Compras en dólares con envío a Colombia', createdAt: now, isDeleted: 0, deletedAt: null },
+      { name: 'Importadora Andina S.A.S.', phone: '3022223344', address: 'Carrera 8 # 12-40', notes: 'Accesorios y cables al por mayor', createdAt: now, isDeleted: 0, deletedAt: null },
     ];
 
     // Ensure all units used by sample products exist in master units table.
     // seedDefaultData() already adds the 9 default units; here we only add
-    // the extras that the sample data uses (e.g. 'plato').
+    // the extras that the sample data uses.
     const sampleUnits = Array.from(new Set(dummyProducts.map(p => p.unit).filter(Boolean)));
     const existingUnits = await db.units.toArray();
     const existingNames = new Set(existingUnits.map(u => u.name));
@@ -127,34 +127,33 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     const discNull: 'percentage' | 'nominal' | null = null;
 
     const tx1Id = await db.transactions.add({
-      subtotal: 40000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 40000,
-      paymentMethodId: 1, paymentAmount: 50000, change: 10000, profit: 21000,
-      date: new Date(now.getTime() - 3600000), receiptNumber: 'TX-DEMO-001',
+      subtotal: 170000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 170000,
+      paymentMethodId: 1, paymentAmount: 200000, change: 30000, profit: 76000,
+      date: new Date(now.getTime() - 3600000), receiptNumber: 'TX-DEMO-001', status: 'completed',
     });
     await db.transactionItems.bulkAdd([
-      { transactionId: tx1Id as number, productId: 1, productName: 'Arroz con pollo', quantity: 2, price: 15000, hpp: 8000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 30000 },
-      { transactionId: tx1Id as number, productId: 6, productName: 'Limonada', quantity: 2, price: 5000, hpp: 1500, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 10000 },
+      { transactionId: tx1Id as number, productId: 1, productName: 'Audífonos inalámbricos', quantity: 1, price: 120000, hpp: 70000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 120000 },
+      { transactionId: tx1Id as number, productId: 3, productName: 'Cable USB-C 1 m', quantity: 2, price: 25000, hpp: 12000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 50000 },
     ]);
 
     const tx2Id = await db.transactions.add({
-      subtotal: 30000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 30000,
-      paymentMethodId: 3, paymentAmount: 30000, change: 0, profit: 14000,
-      date: new Date(now.getTime() - 1800000), receiptNumber: 'TX-DEMO-002',
+      subtotal: 71000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 71000,
+      paymentMethodId: 3, paymentAmount: 71000, change: 0, profit: 35000,
+      date: new Date(now.getTime() - 1800000), receiptNumber: 'TX-DEMO-002', status: 'completed',
     });
     await db.transactionItems.bulkAdd([
-      { transactionId: tx2Id as number, productId: 3, productName: 'Pollo asado', quantity: 1, price: 20000, hpp: 12000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 20000 },
-      { transactionId: tx2Id as number, productId: 8, productName: 'Café con leche', quantity: 1, price: 10000, hpp: 4000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 10000 },
+      { transactionId: tx2Id as number, productId: 2, productName: 'Cargador USB-C 30 W', quantity: 1, price: 56000, hpp: 31000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 56000 },
+      { transactionId: tx2Id as number, productId: 8, productName: 'Protector de pantalla', quantity: 1, price: 15000, hpp: 5000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 15000 },
     ]);
 
     const tx3Id = await db.transactions.add({
-      subtotal: 40000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 40000,
-      paymentMethodId: 1, paymentAmount: 50000, change: 10000, profit: 18500,
-      date: new Date(now.getTime() - 900000), receiptNumber: 'TX-DEMO-003',
+      subtotal: 111000, discountType: discNull, discountValue: 0, discountAmount: 0, total: 111000,
+      paymentMethodId: 2, paymentAmount: 111000, change: 0, profit: 49000,
+      date: new Date(now.getTime() - 900000), receiptNumber: 'TX-DEMO-003', status: 'completed',
     });
     await db.transactionItems.bulkAdd([
-      { transactionId: tx3Id as number, productId: 1, productName: 'Arroz con pollo', quantity: 1, price: 15000, hpp: 8000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 15000 },
-      { transactionId: tx3Id as number, productId: 4, productName: 'Empanadas (x5)', quantity: 1, price: 18000, hpp: 10000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 18000 },
-      { transactionId: tx3Id as number, productId: 7, productName: 'Jugo de naranja', quantity: 1, price: 7000, hpp: 2500, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 7000 },
+      { transactionId: tx3Id as number, productId: 6, productName: 'Rollo de etiquetas 50x30 mm', quantity: 2, price: 33000, hpp: 18500, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 66000 },
+      { transactionId: tx3Id as number, productId: 4, productName: 'Mouse inalámbrico', quantity: 1, price: 45000, hpp: 25000, discountType: discNull, discountValue: 0, discountAmount: 0, subtotal: 45000 },
     ]);
   };
 

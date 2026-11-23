@@ -122,7 +122,7 @@
     "time": "Hora",
     "cashier": "Cajero",
     "customer": "Cliente",
-    "table": "Mesa",
+    "table": "Referencia",
     "notes": "Notas",
     "itemNote": "Nota",
     "subtotal": "Subtotal",
@@ -134,7 +134,6 @@
     "thanks": "¡Gracias!",
     "watermarkLine1": "Impreso desde la app",
     "watermarkLine2": "SD Tech Imports",
-    "kitchenTicket": "COMANDA",
     "dailyTitle": "REPORTE DIARIO DE VENTAS",
     "period": "Periodo",
     "txCount": "Transacciones",
@@ -167,7 +166,7 @@
       "bluetoothOffHint": "Bluetooth no está activado. Actívalo e inténtalo de nuevo."
     },
     "shipping": "Envio",
-    "verify": "Escanea para verificar este recibo"
+    "verify": "Escanea para ver tu compra en línea"
   },
   "permissions": {
     "create_transaction": {

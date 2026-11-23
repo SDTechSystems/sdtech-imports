@@ -46,7 +46,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp}"],
         maximumFileSizeToCacheInBytes: 4000000,
-        navigateFallbackDenylist: [/^\/api\//],
+        // /verificar/* lo arma el Worker (página del recibo), no la app.
+        navigateFallbackDenylist: [/^\/api\//, /^\/verificar\//],
+        globIgnores: ["recibo/**"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

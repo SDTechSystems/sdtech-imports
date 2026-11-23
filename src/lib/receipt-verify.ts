@@ -5,10 +5,9 @@ import { getCloudKey } from '@/lib/cloud-backup';
  * Verificación de recibos por QR.
  *
  * Cada venta recibe un código aleatorio difícil de adivinar. El QR del recibo
- * abre https://<tu-app>/verificar/<código>; esa página pregunta al Worker
- * (GET /api/verify/<código>), que responde con los datos básicos de la venta
- * si el recibo existe. Así cualquiera puede comprobar que el recibo salió de
- * tu sistema, pero nadie puede listar tus ventas.
+ * abre https://recibos.sdtechsystems.dev/verificar/<código>, una página que
+ * arma el Worker (worker/receipt-page.ts) con los datos básicos de la venta.
+ * El cliente ve su compra en línea, pero nadie puede listar tus ventas.
  */
 
 const ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // sin 0/O, 1/I/L
@@ -24,14 +23,13 @@ export function isValidVerifyCode(code: string): boolean {
   return /^[2-9A-HJ-NP-Z]{8,16}$/.test(code);
 }
 
-/** Dirección pública para el QR. En la app instalada (Android) hay que configurarla. */
+/** Dirección pública de los recibos (el mismo Worker, en el dominio de la marca). */
+export const DEFAULT_VERIFY_BASE_URL = 'https://recibos.sdtechsystems.dev';
+
+/** Dirección que lleva el QR: la configurada en Ajustes → Recibo o la de la marca. */
 export function getVerifyBaseUrl(settings?: Pick<StoreSettings, 'verifyBaseUrl'>): string {
   const configured = settings?.verifyBaseUrl?.trim().replace(/\/+$/, '');
-  if (configured) return configured;
-  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && !/localhost/.test(window.location.hostname)) {
-    return window.location.origin;
-  }
-  return '';
+  return configured || DEFAULT_VERIFY_BASE_URL;
 }
 
 export function verifyUrl(baseUrl: string, code: string): string {
@@ -43,6 +41,7 @@ export interface PublicReceipt {
   receiptNumber: string;
   date: string;
   store: string;
+  phone?: string;
   total: number;
   shippingFee?: number;
   items: { name: string; quantity: number; subtotal: number }[];
@@ -53,6 +52,7 @@ export function toPublicReceipt(
   tx: Transaction,
   items: TransactionItemRecord[],
   storeName: string,
+  phone?: string,
 ): PublicReceipt | null {
   if (!tx.verifyCode) return null;
   return {
@@ -60,6 +60,7 @@ export function toPublicReceipt(
     receiptNumber: tx.receiptNumber,
     date: new Date(tx.date).toISOString(),
     store: storeName,
+    phone: phone?.trim() || undefined,
     total: tx.total,
     shippingFee: tx.shippingFee || undefined,
     items: items.map((i) => ({ name: i.productName, quantity: i.quantity, subtotal: i.subtotal })),
@@ -97,24 +98,5 @@ export async function voidReceipt(code?: string): Promise<void> {
     });
   } catch {
     // sin conexión
-  }
-}
-
-export type VerifyResult =
-  | { status: 'valid'; receipt: PublicReceipt }
-  | { status: 'void'; receipt: PublicReceipt }
-  | { status: 'not_found' }
-  | { status: 'error' };
-
-export async function verifyReceiptOnline(code: string): Promise<VerifyResult> {
-  try {
-    const res = await fetch(`/api/verify/${encodeURIComponent(code)}`, { cache: 'no-store' });
-    if (res.status === 404) return { status: 'not_found' };
-    if (!res.ok) return { status: 'error' };
-    const body = await res.json();
-    if (body?.receipt) return { status: body.receipt.status === 'void' ? 'void' : 'valid', receipt: body.receipt };
-    return { status: 'not_found' };
-  } catch {
-    return { status: 'error' };
   }
 }

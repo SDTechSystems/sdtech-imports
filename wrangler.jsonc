@@ -7,8 +7,15 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    // El Worker atiende todo primero: arma la página del recibo (/verificar/*)
+    // y limita lo que se abre en el dominio de recibos.
+    "run_worker_first": true
   },
+  // La app sigue en workers.dev. Los recibos se abren en recibos.sdtechsystems.dev,
+  // un dominio personalizado conectado a este Worker desde Cloudflare
+  // (Workers → sdtech-imports → Domains & Routes). No se declara aquí en "routes"
+  // para que el despliegue no dependa de permisos de DNS del token de compilación.
+  "workers_dev": true,
   // Cloudflare crea el espacio KV automáticamente en el primer despliegue.
   "kv_namespaces": [{ "binding": "BACKUPS" }],
   // Vistas previas por rama (npx wrangler preview). Sin BACKUPS a propósito:
