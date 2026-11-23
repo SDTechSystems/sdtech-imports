@@ -103,6 +103,13 @@
     @apply border-border;
   }
 
+  /* html2canvas mide la línea base del texto con una imagen de 1×1 junto a un
+     texto. Con display:block (CSS base de Tailwind) la medida sale mal y el
+     texto de los recibos se dibuja más abajo, encima de las líneas punteadas. */
+  img[width="1"][height="1"] {
+    display: inline;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;

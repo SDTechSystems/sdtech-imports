@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import html2canvas from 'html2canvas';
+import { captureElement } from '@/lib/capture';
 import { Download, Loader2, MessageCircle, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -44,7 +44,7 @@ export default function CustomerStatement({ open, onOpenChange, storeName, custo
 
   const capture = async (): Promise<Blob | null> => {
     if (!ref.current) return null;
-    const canvas = await html2canvas(ref.current, { backgroundColor: '#ffffff', scale: 2, logging: false });
+    const canvas = await captureElement(ref.current, { backgroundColor: '#ffffff', scale: 2, logging: false });
     return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.92));
   };
 
