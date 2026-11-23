@@ -21,24 +21,11 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import { useTranslation } from 'react-i18next';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { downloadOrShareFile } from '@/lib/file-utils';
+import { buildCsv, dataRows, parseCsv, validateProductRows, type ProductImportRow } from '@/lib/product-import';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 
 
-interface ParsedRow {
-  rowNum: number;
-  name: string;
-  sku: string;
-  categoryName: string;
-  price: number;
-  hpp: number;
-  trackStock: boolean;
-  stock: number;
-  unit: string;
-  barcode?: string;
-  description?: string;
-  isValid: boolean;
-  errors: string[];
-}
+type ParsedRow = ProductImportRow;
 
 import HomeStockDialog from '@/components/HomeStockDialog';
 import { inTransitByProduct } from '@/lib/imports';
@@ -200,101 +187,71 @@ export default function Produk() {
     }
   };
 
+  // Columnas de la plantilla, en el orden en que se leen (ver src/lib/product-import.ts).
+  const templateHeaders = () => [
+    t('excel.template.headerName'), t('excel.template.headerSku'), t('excel.template.headerCategory'),
+    t('excel.template.headerPrice'), t('excel.template.headerHpp'), t('excel.template.headerTrackStock'),
+    t('excel.template.headerStock'), t('excel.template.headerUnit'), t('excel.template.headerBarcode'),
+    t('excel.template.headerDescription'), t('excel.template.headerPreorder'),
+  ];
+  const templateSamples = (): (string | number)[][] => [
+    [t('excel.template.sample1Name'), t('excel.template.sample1Sku'), t('excel.template.sample1Category'), 35000, 21500,
+      t('excel.template.yes'), 9, t('excel.template.sample1Unit'), '', t('excel.template.sample1Description'), t('excel.template.no')],
+    [t('excel.template.sample2Name'), t('excel.template.sample2Sku'), t('excel.template.sample2Category'), 56000, 31400,
+      t('excel.template.yes'), 0, t('excel.template.sample2Unit'), '', t('excel.template.sample2Description'), t('excel.template.yes')],
+  ];
+
+  const downloadCsvTemplate = async () => {
+    try {
+      const csv = buildCsv([templateHeaders(), ...templateSamples()]);
+      await downloadOrShareFile(new TextEncoder().encode(csv).buffer as ArrayBuffer, {
+        fileName: t('excel.template.csvFileName'),
+        mimeType: 'text/csv',
+        dialogTitle: t('excel.template.shareDialogTitle'),
+        shareTitle: t('excel.template.shareTitle'),
+      });
+      toast.success(t('excel.toastTemplateDownloaded'));
+    } catch (err) {
+      console.error(err);
+      toast.error(t('excel.toastTemplateFailed'));
+    }
+  };
+
   const downloadTemplate = async () => {
     try {
       const ExcelJSModule = await import('exceljs');
       const ExcelJS = (ExcelJSModule as unknown as { default?: typeof ExcelJSModule }).default ?? ExcelJSModule;
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(t('excel.template.sheetName'));
+      const widths = [30, 15, 18, 15, 12, 22, 13, 12, 16, 40, 20];
+      worksheet.columns = templateHeaders().map((header, i) => ({ header, width: widths[i] }));
 
-      // Setup headers
-      worksheet.columns = [
-        { header: t('excel.template.headerName'), key: 'name', width: 25 },
-        { header: t('excel.template.headerSku'), key: 'sku', width: 15 },
-        { header: t('excel.template.headerCategory'), key: 'category', width: 18 },
-        { header: t('excel.template.headerPrice'), key: 'price', width: 15 },
-        { header: t('excel.template.headerHpp'), key: 'hpp', width: 15 },
-        { header: t('excel.template.headerTrackStock'), key: 'trackStock', width: 22 },
-        { header: t('excel.template.headerStock'), key: 'stock', width: 15 },
-        { header: t('excel.template.headerUnit'), key: 'unit', width: 12 },
-        { header: t('excel.template.headerBarcode'), key: 'barcode', width: 15 },
-        { header: t('excel.template.headerDescription'), key: 'description', width: 30 }
-      ];
-
-      // Style header row
       const headerRow = worksheet.getRow(1);
       headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
       headerRow.eachCell((cell) => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FF4F46E5' } // Indigo-600
-        };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
         cell.alignment = { vertical: 'middle', horizontal: 'left' };
       });
       headerRow.height = 24;
+      templateSamples().forEach((r) => worksheet.addRow(r));
 
-      // Add a couple of examples
-      worksheet.addRow({
-        name: t('excel.template.sample1Name'),
-        sku: t('excel.template.sample1Sku'),
-        category: t('excel.template.sample1Category'),
-        price: 15000,
-        hpp: 8000,
-        trackStock: t('excel.template.yes'),
-        stock: 50,
-        unit: 'pcs',
-        barcode: '8991234567890',
-        description: t('excel.template.sample1Description')
-      });
-
-      worksheet.addRow({
-        name: t('excel.template.sample2Name'),
-        sku: t('excel.template.sample2Sku'),
-        category: t('excel.template.sample2Category'),
-        price: 22000,
-        hpp: 10000,
-        trackStock: t('excel.template.no'),
-        stock: 0,
-        unit: t('excel.template.sample2Unit'),
-        barcode: '',
-        description: t('excel.template.sample2Description')
-      });
-
-      // Add a secondary sheet for referencing active categories and units
+      // Hoja de referencia con las categorías y unidades que ya existen.
       const refSheet = workbook.addWorksheet(t('excel.template.refSheetName'));
       refSheet.columns = [
-        { header: t('excel.template.refCategories'), key: 'categories', width: 25 },
+        { header: t('excel.template.refCategories'), width: 25 },
         { header: '', width: 5 },
-        { header: t('excel.template.refUnits'), key: 'units', width: 25 }
+        { header: t('excel.template.refUnits'), width: 25 },
       ];
-
       const refHeaderRow = refSheet.getRow(1);
       refHeaderRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      refHeaderRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF0284C7' } // Sky-600
-      };
-      refHeaderRow.getCell(3).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF0D9488' } // Teal-600
-      };
-
+      refHeaderRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } };
+      refHeaderRow.getCell(3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D9488' } };
       const cats = categories || [];
       const unts = units || [];
-      const maxRows = Math.max(cats.length, unts.length);
-
-      for (let i = 0; i < maxRows; i++) {
-        refSheet.addRow([
-          cats[i] ? cats[i].name : '',
-          '',
-          unts[i] ? unts[i].name : ''
-        ]);
+      for (let i = 0; i < Math.max(cats.length, unts.length); i++) {
+        refSheet.addRow([cats[i]?.name ?? '', '', unts[i]?.name ?? '']);
       }
 
-      // Write to file
       const buffer = await workbook.xlsx.writeBuffer();
       await downloadOrShareFile(buffer as ArrayBuffer, {
         fileName: t('excel.template.fileName'),
@@ -309,217 +266,61 @@ export default function Produk() {
     }
   };
 
-  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  /** Lee la primera hoja de un .xlsx como tabla de textos. */
+  const readXlsxTable = async (file: File): Promise<string[][]> => {
+    const ExcelJSModule = await import('exceljs');
+    const ExcelJS = (ExcelJSModule as unknown as { default?: typeof ExcelJSModule }).default ?? ExcelJSModule;
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(await file.arrayBuffer());
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) return [];
+    const table: string[][] = [];
+    worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+      const values: string[] = [];
+      for (let col = 1; col <= 11; col++) {
+        const v = row.getCell(col).value;
+        let text = '';
+        if (v && typeof v === 'object') {
+          if ('richText' in v) text = v.richText.map((r) => r.text).join('');
+          else if ('result' in v) text = String(v.result ?? '');
+          else if ('text' in v) text = String(v.text ?? '');
+        } else if (v !== undefined && v !== null) text = String(v);
+        values.push(text.trim());
+      }
+      table[rowNumber - 1] = values;
+    });
+    return Array.from(table, (r) => r ?? []);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImportFile(file);
     setIsValidating(true);
     setHasMoreThan100(false);
     setImportRows([]);
-
     try {
-      const ExcelJSModule = await import('exceljs');
-      const ExcelJS = (ExcelJSModule as unknown as { default?: typeof ExcelJSModule }).default ?? ExcelJSModule;
-      const workbook = new ExcelJS.Workbook();
-      const reader = new FileReader();
-
-      reader.onload = async (evt) => {
-        try {
-          const buffer = evt.target?.result as ArrayBuffer;
-          await workbook.xlsx.load(buffer);
-
-          const worksheet = workbook.worksheets[0];
-          if (!worksheet) {
-            toast.error(t('excel.toastFileEmpty'));
-            setIsValidating(false);
-            return;
-          }
-
-          const tempRows: ParsedRow[] = [];
-          const skuInFile = new Set<string>();
-
-          // Get active db categories & units for validation
-          const activeCats = categories || [];
-          const activeUnts = units || [];
-
-          // Get existing products in DB (including isDeleted: 1)
-          const allDbProducts = await db.products.toArray();
-          const dbSkus = new Set(allDbProducts.map(p => p.sku.toLowerCase().trim()));
-          const dbProductsBySku = new Map(allDbProducts.map(p => [p.sku.toLowerCase().trim(), p.name]));
-
-          let rowCount = 0;
-          worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber === 1) return; // skip header row
-
-            // Check if row has any values to prevent processing empty rows
-            let hasValue = false;
-            row.eachCell((cell) => {
-              if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
-                hasValue = true;
-              }
-            });
-            if (!hasValue) return;
-
-            rowCount++;
-            if (rowCount > 100) {
-              setHasMoreThan100(true);
-              return; // ignore rows after 100
-            }
-
-            // Extract values
-            const getVal = (col: number): string => {
-              const cell = row.getCell(col);
-              if (cell.value && typeof cell.value === 'object') {
-                if ('richText' in cell.value) {
-                  return cell.value.richText.map(t => t.text).join('').trim();
-                }
-                if ('result' in cell.value) {
-                  return String(cell.value.result ?? '').trim();
-                }
-                if ('text' in cell.value) {
-                  return String(cell.value.text ?? '').trim();
-                }
-                return '';
-              }
-              return cell.value !== undefined && cell.value !== null ? String(cell.value).trim() : '';
-            };
-
-            const name = getVal(1);
-            const sku = getVal(2);
-            const categoryName = getVal(3);
-            const priceStr = getVal(4);
-            const hppStr = getVal(5);
-            const trackStockStr = getVal(6);
-            const stockStr = getVal(7);
-            const unit = getVal(8);
-            const barcode = getVal(9) || undefined;
-            const description = getVal(10) || undefined;
-
-            const errors: string[] = [];
-
-            // Validation
-            if (!name) {
-              errors.push(t('excel.errorNameRequired'));
-            }
-            if (!sku) {
-              errors.push(t('excel.errorSkuRequired'));
-            } else {
-              const skuLower = sku.toLowerCase().trim();
-              if (skuInFile.has(skuLower)) {
-                errors.push(t('excel.errorSkuDupExcel'));
-              } else {
-                skuInFile.add(skuLower);
-              }
-              if (dbSkus.has(skuLower)) {
-                const existingName = dbProductsBySku.get(skuLower);
-                errors.push(t('excel.errorSkuDupDb') + ` ("${existingName}")`);
-              }
-            }
-
-            // Check Category Name (case-insensitive)
-            const matchedCat = activeCats.find(c => c.name.toLowerCase().trim() === categoryName.toLowerCase().trim());
-            if (!categoryName) {
-              errors.push(t('excel.errorCatNotFound'));
-            } else if (!matchedCat) {
-              errors.push(t('excel.errorCatNotFound') + `: "${categoryName}"`);
-            }
-
-            // Check Unit Name (case-insensitive)
-            const matchedUnit = activeUnts.find(u => u.name.toLowerCase().trim() === unit.toLowerCase().trim());
-            if (!unit) {
-              errors.push(t('excel.errorUnitNotFound'));
-            } else if (!matchedUnit) {
-              errors.push(t('excel.errorUnitNotFound') + `: "${unit}"`);
-            }
-
-            // Parse numbers (handling $, COP, spaces, commas, dots)
-            const cleanNumber = (val: string): number => {
-              if (!val) return 0;
-              let clean = val.replace(/COP|\$/gi, '').replace(/\s+/g, '');
-              const lastDot = clean.lastIndexOf('.');
-              const lastComma = clean.lastIndexOf(',');
-              if (lastDot > lastComma) {
-                clean = clean.replace(/,/g, '');
-              } else if (lastComma > lastDot) {
-                clean = clean.replace(/\./g, '').replace(/,/g, '.');
-              } else {
-                const match = clean.match(/[.,](\d+)$/);
-                if (match) {
-                  const decimals = match[1];
-                  if (decimals.length === 3) {
-                    clean = clean.replace(/[.,]/g, '');
-                  } else {
-                    clean = clean.replace(/[.,]/g, '.');
-                  }
-                }
-              }
-              const parsed = Number(clean);
-              return isNaN(parsed) ? -1 : parsed;
-            };
-
-            const price = cleanNumber(priceStr);
-            const hpp = hppStr ? cleanNumber(hppStr) : 0;
-            const stock = stockStr ? cleanNumber(stockStr) : 0;
-
-            if (price < 0) {
-              errors.push(t('excel.errorPriceInvalid'));
-            }
-            if (hpp < 0) {
-              errors.push(t('excel.errorHppInvalid'));
-            }
-
-            // Track stock boolean: defaults to true. Columns are read by index, so
-            // templates with Indonesian, Spanish or English headers all import.
-            // Falsy values accept es/en ("No", "False", "Falso") and legacy
-            // Indonesian ("Tidak", "Salah") answers.
-            let trackStock = true;
-            if (trackStockStr) {
-              const lower = trackStockStr.toLowerCase().trim();
-              const falsyValues = ['no', 'false', 'falso', '0', 'tidak', 'salah'];
-              if (falsyValues.includes(lower)) {
-                trackStock = false;
-              }
-            }
-
-            if (trackStock && stock < 0) {
-              errors.push(t('excel.errorStockInvalid'));
-            }
-
-            tempRows.push({
-              rowNum: rowNumber,
-              name,
-              sku,
-              categoryName,
-              price: price >= 0 ? price : 0,
-              hpp: hpp >= 0 ? hpp : 0,
-              trackStock,
-              stock: stock >= 0 ? stock : 0,
-              unit,
-              barcode,
-              description,
-              isValid: errors.length === 0,
-              errors
-            });
-          });
-
-          setImportRows(tempRows);
-          setIsValidating(false);
-        } catch (err) {
-          console.error(err);
-          toast.error(t('excel.toastReadExcelFailed'));
-          setIsValidating(false);
-        }
-      };
-
-      reader.onerror = () => {
-        toast.error(t('excel.toastReadFileFailed'));
-        setIsValidating(false);
-      };
-
-      reader.readAsArrayBuffer(file);
+      const isCsv = /\.(csv|txt)$/i.test(file.name) || file.type === 'text/csv';
+      const table = isCsv ? parseCsv(await file.text()) : await readXlsxTable(file);
+      if (table.length < 2) {
+        toast.error(t('excel.toastFileEmpty'));
+        setImportFile(null);
+        return;
+      }
+      const { rows, rowNums, truncated } = dataRows(table);
+      const allDbProducts = await db.products.toArray();
+      setImportRows(validateProductRows(rows, rowNums, {
+        categories: categories || [],
+        units: units || [],
+        existingSkus: new Map(allDbProducts.map((p) => [p.sku.toLowerCase().trim(), p.name])),
+        t: (key) => t(key),
+      }));
+      setHasMoreThan100(truncated);
     } catch (err) {
       console.error(err);
-      toast.error(t('excel.toastProcessFailed'));
+      toast.error(t('excel.toastReadExcelFailed'));
+      setImportFile(null);
+    } finally {
       setIsValidating(false);
     }
   };
@@ -533,20 +334,30 @@ export default function Produk() {
 
     try {
       const now = new Date();
-      const activeCats = categories || [];
-      
-      const newProducts: Product[] = validRows.map(r => {
-        const matchedCat = activeCats.find(c => c.name.toLowerCase().trim() === r.categoryName.toLowerCase().trim());
-        const categoryId = matchedCat?.id || 0;
-
-        return {
+      const key = (s: string) => s.toLowerCase().trim();
+      await db.transaction('rw', db.products, db.categories, db.units, async () => {
+        // Crea las categorías y unidades que el archivo trae y aún no existen.
+        const catIds = new Map((await db.categories.where('isDeleted').equals(0).toArray()).map(c => [key(c.name), c.id!]));
+        const unitNames = new Set((await db.units.where('isDeleted').equals(0).toArray()).map(u => key(u.name)));
+        for (const r of validRows) {
+          if (!catIds.has(key(r.categoryName))) {
+            const id = await db.categories.add({ name: r.categoryName.trim(), color: '#95A5A6', icon: '📦', createdAt: now, isDeleted: 0, deletedAt: null });
+            catIds.set(key(r.categoryName), id as number);
+          }
+          if (!unitNames.has(key(r.unit))) {
+            await db.units.add({ name: r.unit.trim(), isDefault: 0, createdAt: now, isDeleted: 0, deletedAt: null });
+            unitNames.add(key(r.unit));
+          }
+        }
+        await db.products.bulkAdd(validRows.map(r => ({
           name: r.name,
           sku: r.sku,
-          categoryId,
+          categoryId: catIds.get(key(r.categoryName))!,
           price: r.price,
           hpp: r.hpp,
           stock: r.trackStock ? r.stock : 0,
           trackStock: r.trackStock,
+          preorder: r.preorder || undefined,
           unit: r.unit,
           barcode: r.barcode,
           description: r.description,
@@ -556,13 +367,11 @@ export default function Produk() {
           isDeleted: 0,
           deletedAt: null,
           createdBy: currentUser?.id,
-          updatedBy: currentUser?.id
-        };
+          updatedBy: currentUser?.id,
+        })));
       });
 
-      await db.products.bulkAdd(newProducts);
-
-      toast.success(t('excel.toastSuccess', { count: newProducts.length }));
+      toast.success(t('excel.toastSuccess', { count: validRows.length }));
       setImportDialogOpen(false);
       setImportRows([]);
       setImportFile(null);
@@ -948,10 +757,16 @@ export default function Produk() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {t('excel.step1Desc')}
                   </p>
-                  <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-1.5">
-                    <Download className="w-3.5 h-3.5" />
-                    {t('excel.downloadTemplate')}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={downloadCsvTemplate} className="gap-1.5">
+                      <Download className="w-3.5 h-3.5" />
+                      {t('excel.downloadCsvTemplate')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-1.5">
+                      <Download className="w-3.5 h-3.5" />
+                      {t('excel.downloadTemplate')}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -972,9 +787,9 @@ export default function Produk() {
                     <input
                       ref={importFileInputRef}
                       type="file"
-                      accept=".xlsx, .xls"
+                      accept=".csv,.xlsx,text/csv"
                       className="hidden"
-                      onChange={handleExcelUpload}
+                      onChange={handleImportFile}
                     />
                   </div>
                 </div>
@@ -1040,10 +855,18 @@ export default function Produk() {
                             <TableCell>{row.unit || '-'}</TableCell>
                             <TableCell>
                               {row.isValid ? (
-                                <span className="flex items-center gap-1 text-xs text-success font-medium">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  {t('excel.valid')}
-                                </span>
+                                <div className="space-y-1">
+                                  <span className="flex items-center gap-1 text-xs text-success font-medium">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    {t('excel.valid')}
+                                  </span>
+                                  {row.newCategory && (
+                                    <span className="block text-[11px] text-amber-700 dark:text-amber-400 leading-tight">{t('excel.newCategory', { name: row.categoryName })}</span>
+                                  )}
+                                  {row.newUnit && (
+                                    <span className="block text-[11px] text-amber-700 dark:text-amber-400 leading-tight">{t('excel.newUnit', { name: row.unit })}</span>
+                                  )}
+                                </div>
                               ) : (
                                 <div className="space-y-1">
                                   {row.errors.map((err, i) => (
