@@ -66,7 +66,7 @@ export default function Dashboard() {
     return open.length;
   }, []);
 
-  const lowStockProducts = useLiveQuery(() => db.products.filter(p => p.isDeleted === 0 && isStockManaged(p) && p.stock <= 5).toArray());
+  const lowStockProducts = useLiveQuery(() => db.products.filter(p => p.isDeleted === 0 && isStockManaged(p) && !p.preorder && p.stock <= 5).toArray());
 
   const todayExpenses = useLiveQuery(async () => {
     const all = await db.expenses.where('date').aboveOrEqual(today).toArray();

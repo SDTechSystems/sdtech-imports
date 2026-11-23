@@ -71,6 +71,11 @@
     "skip": "Skip"
   },
   "whatsNewFeatures": {
+    "2026-11-preorder": {
+      "title": "Sell to order",
+      "description": "Mark a product as “Sold to order” and you can charge for it at the register even with no stock. Those units show as “to deliver” until the purchase arrives.",
+      "ctaLabel": "View products"
+    },
     "2026-11-imports": {
       "title": "Dollar purchases and orders on the way",
       "description": "Record your Amazon purchases in dollars: the app converts them to pesos with today's rate (or the rate you paid) and adds shipping. Anything still in transit shows on the home screen until you mark it as received.",

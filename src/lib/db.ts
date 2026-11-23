@@ -69,6 +69,7 @@ export interface Product {
   stock: number; // existencia total (oficina + casa)
   stockHome?: number; // parte de `stock` guardada en casa; la oficina tiene stock - stockHome
   trackStock?: boolean; // true/undefined = stok dikelola (default lama), false = stok tidak dikelola (selalu tersedia)
+  preorder?: boolean; // se vende por encargo: se cobra aunque no haya existencias; el stock negativo son unidades por entregar
   unit: string; // satuan: pcs, kg, liter, dll
   description?: string; // deskripsi/catatan produk (opsional, multi-line)
   photo?: string; // base64 or blob URL
@@ -853,6 +854,20 @@ setupTimestampHooks(db);
 // `false` = tidak dikelola (produk selalu tersedia, stok diabaikan).
 export function isStockManaged(product: Pick<Product, 'trackStock'>): boolean {
   return product.trackStock !== false;
+}
+
+/**
+ * ¿Se pueden vender `qty` unidades? Los productos sin control de stock y los
+ * que se venden por encargo siempre se pueden vender; los demás, hasta su stock.
+ */
+export function canSell(product: Pick<Product, 'trackStock' | 'preorder' | 'stock'>, qty: number): boolean {
+  if (!isStockManaged(product) || product.preorder) return true;
+  return qty <= product.stock;
+}
+
+/** Unidades vendidas por encargo que todavía no se han entregado (stock negativo). */
+export function pendingDelivery(product: Pick<Product, 'trackStock' | 'stock'>): number {
+  return isStockManaged(product) && product.stock < 0 ? -product.stock : 0;
 }
 
 async function sanitizeTableDates(table: any, dateFields: string[]) {

@@ -826,7 +826,9 @@
     },
     "productCard": {
       "stock": "Inventario: {{stock}} {{unit}}",
-      "alwaysAvailable": "Siempre disponible"
+      "alwaysAvailable": "Siempre disponible",
+      "preorder": "Por encargo",
+      "preorderPending": "Por encargo · {{count}} {{unit}} por entregar"
     },
     "cart": {
       "title": "Carrito ({{count}} artículo)",
