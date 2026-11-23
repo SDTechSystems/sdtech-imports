@@ -118,15 +118,28 @@ export interface Customer {
   syncedAt?: Date | null;
 }
 
+export type ImportOrigin = 'US' | 'CN' | 'CO' | 'OTHER';
+export type StockInStatus = 'in_transit' | 'received';
+
 export interface StockIn {
   id?: number;
   productId: number;
   supplierId: number;
   quantity: number;
-  buyPrice: number; // harga beli per unit
-  totalPrice: number;
-  date: Date;
+  buyPrice: number; // costo por unidad en pesos, ya con la conversión y el envío
+  totalPrice: number; // costo total en pesos (producto + envío)
+  date: Date; // fecha del pago
   notes: string;
+  // === Importación ===
+  status?: StockInStatus; // undefined = recibido (registros antiguos)
+  origin?: ImportOrigin;
+  usdUnitPrice?: number; // precio por unidad en dólares (puede tener centavos)
+  exchangeRate?: number; // pesos por dólar el día del pago
+  exchangeRateSource?: 'market' | 'manual';
+  shippingCost?: number; // envío total en pesos, escrito a mano
+  tracking?: string; // número de guía / pedido de Amazon
+  toHome?: boolean; // al recibirlo entra al inventario de casa
+  receivedAt?: Date | null;
   createdBy?: number; // userId
   updatedAt?: Date;
   syncedAt?: Date | null;
@@ -208,6 +221,8 @@ export interface Transaction {
   createdBy?: number; // userId — kasir pembuat transaksi
   debtAmount?: number; // snapshot hutang awal; 0/undefined = lunas saat checkout
   soldFromHome?: boolean; // la mercancía salió del inventario de casa
+  shippingFee?: number; // envío cobrado al cliente (no es ganancia)
+  verifyCode?: string; // código del QR para verificar el recibo
   updatedAt?: Date;
   syncedAt?: Date | null;
 }
@@ -322,6 +337,8 @@ export interface StoreSettings {
   printLogo?: boolean; // toggle to print store logo on ESC/POS receipt
   hideWatermark?: boolean; // toggle to hide FreeKasir.com credit/watermark on ESC/POS receipt
   investor?: Partial<InvestorConfig>; // reparto de ganancias con el inversionista
+  verifyBaseUrl?: string; // dirección pública de la app para el QR de los recibos
+  lastExchangeRate?: number; // última tasa de cambio usada (pesos por dólar)
 }
 
 // === Database ===
@@ -809,6 +826,16 @@ class PosDatabase extends Dexie {
       await backfillTable('debts', ['createdAt']);
       await backfillTable('debtPayments', ['date']);
       await backfillTable('stockOpnames', ['date']);
+    });
+
+    // Version 15 - SD Tech Imports: compras en tránsito y verificación de recibos
+    this.version(15).stores({
+      stockIns:     '++id, productId, supplierId, date, status, createdBy, updatedAt, syncedAt',
+      transactions: '++id, date, &receiptNumber, paymentMethodId, status, orderNumber, verifyCode, createdBy, updatedAt, syncedAt',
+    }).upgrade(async (tx) => {
+      await tx.table('stockIns').toCollection().modify((record: any) => {
+        if (!record.status) record.status = 'received';
+      });
     });
   }
 }

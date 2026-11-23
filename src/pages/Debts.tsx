@@ -28,6 +28,7 @@ import {
   CREDIT_METHOD_CATEGORY,
   customerKey,
   recordCustomerPayment,
+  customerLabel,
 } from '@/lib/customer-account';
 
 type DebtFilter = 'active' | 'settled' | 'all';
@@ -104,7 +105,7 @@ export default function DebtsPage() {
     }
     for (const acc of byKey.values()) {
       acc.credit = creditBalance(acc.customer);
-      if (acc.customer) acc.name = acc.customer.name;
+      if (acc.customer) acc.name = customerLabel(acc.customer);
       acc.pending.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     return [...byKey.values()].sort((a, b) => b.remaining - a.remaining || a.name.localeCompare(b.name));
@@ -440,7 +441,7 @@ export default function DebtsPage() {
         <CustomerStatement
           open={statementOpen}
           onOpenChange={setStatementOpen}
-          storeName={storeSettings?.storeName || 'EasyDrink'}
+          storeName={storeSettings?.storeName || 'SD Tech Imports'}
           customerName={selected.name}
           phone={selected.customer?.phone}
           whatsappUser={selected.customer?.whatsappUser}

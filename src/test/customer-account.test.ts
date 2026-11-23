@@ -63,7 +63,7 @@ describe('buildStatementText', () => {
     const { buildStatementText } = await import('@/lib/customer-statement');
     const text = buildStatementText(
       {
-        storeName: 'EasyDrink', customerName: 'Juan Becerra', credit: 2000,
+        storeName: 'SD Tech Imports', customerName: 'Juan Becerra', credit: 2000,
         lines: [
           { date: new Date(2026, 10, 13), items: [{ name: 'Amper Ultra', quantity: 1, subtotal: 5000 }], original: 5000, paid: 0, remaining: 5000 },
           { date: new Date(2026, 10, 16), items: [{ name: 'H2O', quantity: 2, subtotal: 6000 }], original: 6000, paid: 1000, remaining: 5000 },
@@ -71,7 +71,7 @@ describe('buildStatementText', () => {
       },
       { title: 'Estado de cuenta', greeting: 'Hola Juan', total: 'Total pendiente', credit: 'Saldo a favor', net: 'Total a pagar', paid: 'abonado', missing: 'falta', thanks: 'Gracias' },
     );
-    expect(text).toContain('*EasyDrink* — Estado de cuenta');
+    expect(text).toContain('*SD Tech Imports* — Estado de cuenta');
     expect(text).toContain('1 Amper Ultra');
     expect(text).toMatch(/2 H2O — \$\s?6\.000 \(abonado \$\s?1\.000, falta \$\s?5\.000\)/);
     expect(text).toMatch(/\*Total pendiente: \$\s?10\.000\*/);

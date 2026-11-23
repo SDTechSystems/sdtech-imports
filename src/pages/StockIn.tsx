@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, isStockManaged } from '@/lib/db';
-import { useState } from 'react';
-import { ArrowDownToLine, Plus, ChevronLeft } from 'lucide-react';
+import { db, isStockManaged, type ImportOrigin } from '@/lib/db';
+import { useEffect, useState } from 'react';
+import { ArrowDownToLine, Plus, ChevronLeft, Plane, PackageCheck, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -10,95 +10,158 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import LockedPage from '@/components/LockedPage';
 import ProductPicker from '@/components/ProductPicker';
 import SearchableSelect from '@/components/SearchableSelect';
 import NumberInput from '@/components/NumberInput';
+import ReceiveImportDialog from '@/components/ReceiveImportDialog';
 import { useTranslation } from 'react-i18next';
-import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
 import { getDateLocale } from '@/i18n';
+import { cn } from '@/lib/utils';
+import {
+  ORIGINS,
+  ORIGIN_FLAG,
+  fetchUsdCopRate,
+  formatUsd,
+  isInTransit,
+  landedCost,
+  receiveStockIn,
+  type ExchangeRate,
+} from '@/lib/imports';
+
+type StatusFilter = 'all' | 'in_transit' | 'received';
+type PayCurrency = 'USD' | 'COP';
 
 export default function StockInPage() {
   const { currentUser, can } = useAuth();
   const { t, i18n } = useTranslation('settings');
   const dateLocale = getDateLocale(i18n.language);
-  const numberLocale = NUMBER_LOCALE;
-  const currencySymbol = CURRENCY_SYMBOL;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [productId, setProductId] = useState('');
   const [supplierId, setSupplierId] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [buyPrice, setBuyPrice] = useState('');
+  const [currency, setCurrency] = useState<PayCurrency>('USD');
+  const [unitPrice, setUnitPrice] = useState(''); // en la moneda elegida
+  const [rate, setRate] = useState('');
+  const [marketRate, setMarketRate] = useState<ExchangeRate | null>(null);
+  const [rateLoading, setRateLoading] = useState(false);
+  const [shipping, setShipping] = useState('');
+  const [origin, setOrigin] = useState<ImportOrigin>('US');
+  const [inTransit, setInTransit] = useState(true);
+  const [tracking, setTracking] = useState('');
   const [notes, setNotes] = useState('');
   const [toHome, setToHome] = useState(false);
   const [filterSupplier, setFilterSupplier] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    searchParams.get('estado') === 'transito' ? 'in_transit' : 'all',
+  );
+  const [openId, setOpenId] = useState<number | null>(null);
 
   const stockIns = useLiveQuery(() => db.stockIns.orderBy('date').reverse().toArray());
   const products = useLiveQuery(() => db.products.where('isDeleted').equals(0).toArray());
   const suppliers = useLiveQuery(() => db.suppliers.where('isDeleted').equals(0).toArray());
+  const storeSettings = useLiveQuery(() => db.storeSettings.toCollection().first());
+
+  useEffect(() => {
+    const id = Number(searchParams.get('abrir'));
+    if (id) {
+      setOpenId(id);
+      searchParams.delete('abrir');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   if (!can('manage_stock_inout')) {
     return <LockedPage title={t('stockIn.locked.title')} permissionLabel={t('stockIn.locked.permissionLabel')} />;
   }
 
   const filtered = stockIns?.filter(si =>
-    filterSupplier === 'all' || si.supplierId === Number(filterSupplier)
+    (filterSupplier === 'all' || si.supplierId === Number(filterSupplier)) &&
+    (statusFilter === 'all' || (statusFilter === 'in_transit' ? isInTransit(si) : !isInTransit(si)))
   ) ?? [];
+  const transitCount = stockIns?.filter(isInTransit).length ?? 0;
 
   const getProductName = (pid: number) => products?.find(p => p.id === pid)?.name ?? '-';
-  const getSupplierName = (sid: number) => suppliers?.find(s => s.id === sid)?.name ?? '-';
+  const getSupplierName = (sid: number) => suppliers?.find(s => s.id === sid)?.name;
 
-  const openAdd = () => {
-    setProductId(''); setSupplierId(''); setQuantity(''); setBuyPrice(''); setNotes(''); setToHome(false);
-    setDialogOpen(true);
+  const loadRate = async () => {
+    setRateLoading(true);
+    try {
+      const r = await fetchUsdCopRate();
+      setMarketRate(r);
+      return r;
+    } catch {
+      toast.error(t('stockIn.import.rateError'));
+      return null;
+    } finally {
+      setRateLoading(false);
+    }
   };
 
+  const openAdd = async () => {
+    setProductId(''); setSupplierId(''); setQuantity(''); setUnitPrice(''); setShipping('');
+    setNotes(''); setTracking(''); setToHome(false); setCurrency('USD'); setOrigin('US'); setInTransit(true);
+    setRate(storeSettings?.lastExchangeRate ? String(storeSettings.lastExchangeRate) : '');
+    setDialogOpen(true);
+    // Se propone la tasa del día; si no hay conexión queda la última que usaste.
+    const r = await loadRate();
+    if (r) setRate(String(Math.round(r.rate)));
+  };
+
+  const qty = Number(quantity) || 0;
+  const price = Number(unitPrice) || 0;
+  const rateNum = currency === 'USD' ? Number(rate) || 0 : 1;
+  const cost = landedCost({ quantity: qty, usdUnitPrice: price, exchangeRate: rateNum, shippingCost: Number(shipping) || 0 });
+
   const handleSave = async () => {
-    const qty = Number(quantity);
-    const price = Number(buyPrice);
-    if (!productId || !supplierId || qty <= 0 || price <= 0) {
+    if (!productId || qty <= 0 || price <= 0 || (currency === 'USD' && rateNum <= 0)) {
       toast.error(t('stockIn.toast.fillAll'));
       return;
     }
-
     const product = products?.find(p => p.id === Number(productId));
     if (!product) return;
 
-    await db.stockIns.add({
-      productId: Number(productId),
-      supplierId: Number(supplierId),
+    const now = new Date();
+    const id = await db.stockIns.add({
+      productId: product.id!,
+      supplierId: Number(supplierId) || 0,
       quantity: qty,
-      buyPrice: price,
-      totalPrice: qty * price,
-      date: new Date(),
+      buyPrice: cost.unitCop,
+      totalPrice: cost.totalCop,
+      date: now,
       notes: notes.trim(),
       createdBy: currentUser?.id,
-    });
+      status: 'in_transit',
+      origin,
+      ...(currency === 'USD'
+        ? {
+            usdUnitPrice: price,
+            exchangeRate: rateNum,
+            exchangeRateSource: marketRate && Math.round(marketRate.rate) === Math.round(rateNum) ? 'market' as const : 'manual' as const,
+          }
+        : {}),
+      shippingCost: cost.shippingCop || undefined,
+      tracking: tracking.trim() || undefined,
+      toHome,
+      receivedAt: null,
+    }) as number;
 
-    const oldStock = product.stock;
-    const oldHpp = product.hpp;
-    const newStock = Math.round((oldStock + qty) * 1e6) / 1e6;
-    const newHpp = newStock > 0 ? ((oldStock * oldHpp) + (qty * price)) / newStock : price;
+    if (currency === 'USD' && storeSettings?.id) {
+      await db.storeSettings.update(storeSettings.id, { lastExchangeRate: rateNum });
+    }
 
-    await db.hppHistory.add({
-      productId: product.id!,
-      oldHpp,
-      newHpp,
-      source: 'stock_in',
-      date: new Date(),
-    });
-
-    await db.products.update(product.id!, {
-      stock: newStock,
-      hpp: Math.round(newHpp),
-      ...(toHome ? { stockHome: (product.stockHome ?? 0) + qty } : {}),
-      updatedAt: new Date(),
-    });
-
-    toast.success(t('stockIn.toast.success', { product: product.name, qty, hpp: Math.round(newHpp).toLocaleString(numberLocale) }));
+    if (!inTransit) {
+      await receiveStockIn(id, now);
+      const updated = await db.products.get(product.id!);
+      toast.success(t('stockIn.toast.success', { product: product.name, qty, hpp: (updated?.hpp ?? cost.unitCop).toLocaleString('es-CO') }));
+    } else {
+      toast.success(t('stockIn.import.savedInTransit', { product: product.name, qty }));
+    }
     setDialogOpen(false);
   };
 
@@ -117,6 +180,21 @@ export default function StockInPage() {
         <Button size="sm" onClick={openAdd} className="h-9 gap-1.5">
           <Plus className="w-4 h-4" /> {t('stockIn.add')}
         </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
+        {(['all', 'in_transit', 'received'] as StatusFilter[]).map(f => (
+          <button
+            key={f}
+            onClick={() => setStatusFilter(f)}
+            className={cn(
+              'rounded-md py-1.5 text-xs font-medium transition-colors',
+              statusFilter === f ? 'bg-background shadow-sm' : 'text-muted-foreground',
+            )}
+          >
+            {t(`stockIn.import.filter.${f}`)}{f === 'in_transit' && transitCount > 0 ? ` (${transitCount})` : ''}
+          </button>
+        ))}
       </div>
 
       <SearchableSelect
@@ -139,32 +217,59 @@ export default function StockInPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(si => (
-            <Card key={si.id} className="border-0 shadow-sm">
-              <CardContent className="p-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold">{getProductName(si.productId)}</h3>
-                    <p className="text-xs text-muted-foreground">{t('stockIn.item.fromSupplier', { supplier: getSupplierName(si.supplierId) })}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="text-xs font-medium bg-success/10 text-success px-2 py-0.5 rounded">{t('stockIn.item.quantity', { qty: si.quantity })}</span>
-                      <span className="text-xs text-muted-foreground">{t('stockIn.item.unitPrice', { price: si.buyPrice.toLocaleString(numberLocale) })}</span>
+          {filtered.map(si => {
+            const transit = isInTransit(si);
+            const supplierName = getSupplierName(si.supplierId);
+            return (
+              <Card key={si.id} className="border-0 shadow-sm cursor-pointer active:scale-[0.99] transition-transform" onClick={() => setOpenId(si.id!)}>
+                <CardContent className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold truncate">
+                        {si.origin && <span className="mr-1">{ORIGIN_FLAG[si.origin]}</span>}
+                        {getProductName(si.productId)}
+                      </h3>
+                      {supplierName && <p className="text-xs text-muted-foreground">{t('stockIn.item.fromSupplier', { supplier: supplierName })}</p>}
+                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                        <span className={cn(
+                          'text-xs font-medium px-2 py-0.5 rounded inline-flex items-center gap-1',
+                          transit ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400' : 'bg-success/10 text-success',
+                        )}>
+                          {transit ? <Plane className="w-3 h-3" /> : <PackageCheck className="w-3 h-3" />}
+                          {transit ? t('stockIn.import.statusTransit') : t('stockIn.import.statusReceived')}
+                        </span>
+                        <span className="text-xs font-medium">{t('stockIn.item.quantity', { qty: si.quantity })}</span>
+                        {si.usdUnitPrice !== undefined && (
+                          <span className="text-xs text-muted-foreground">{formatUsd(si.usdUnitPrice)} × {formatCurrency(si.exchangeRate ?? 0)}</span>
+                        )}
+                      </div>
                     </div>
-                    {si.notes && <p className="text-xs text-muted-foreground mt-1 italic">{si.notes}</p>}
+                    <div className="text-right shrink-0">
+                      <p className="text-xs text-muted-foreground">{format(new Date(si.date), 'dd MMM yy', { locale: dateLocale })}</p>
+                      <p className="text-sm font-bold mt-1">{formatCurrency(si.totalPrice)}</p>
+                      {transit && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 mt-1.5 text-[11px] px-2"
+                          onClick={(e) => { e.stopPropagation(); setOpenId(si.id!); }}
+                        >
+                          {t('stockIn.import.receiveShort')}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{format(new Date(si.date), 'dd MMM yy', { locale: dateLocale })}</p>
-                    <p className="text-sm font-bold mt-1">{currencySymbol} {si.totalPrice.toLocaleString(numberLocale)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
+      <ReceiveImportDialog stockInId={openId} onClose={() => setOpenId(null)} />
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[95vw] rounded-xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader><DialogTitle>{t('stockIn.dialog.title')}</DialogTitle></DialogHeader>
           <div className="space-y-4 mt-2">
             <div className="space-y-1.5">
@@ -177,31 +282,137 @@ export default function StockInPage() {
                 showHpp
               />
             </div>
+
             <div className="space-y-1.5">
-              <Label>{t('stockIn.dialog.supplierLabel')}</Label>
+              <Label>{t('stockIn.import.originLabel')}</Label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {ORIGINS.map(o => (
+                  <button
+                    key={o}
+                    type="button"
+                    onClick={() => { setOrigin(o); if (o === 'CO') { setCurrency('COP'); setInTransit(false); } }}
+                    className={cn(
+                      'rounded-lg border py-2 text-xs font-medium flex flex-col items-center gap-0.5',
+                      origin === o ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground',
+                    )}
+                  >
+                    <span className="text-base leading-none">{ORIGIN_FLAG[o]}</span>
+                    {t(`stockIn.import.origin.${o}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('stockIn.dialog.supplierLabelOptional')}</Label>
               <SearchableSelect
                 value={supplierId}
                 onChange={setSupplierId}
-                placeholder={t('stockIn.supplierFilter.searchPlaceholder')}
+                placeholder={t('stockIn.import.supplierPlaceholder')}
                 searchPlaceholder={t('stockIn.supplierFilter.searchPlaceholder')}
                 options={suppliers?.map(s => ({ value: s.id!.toString(), label: s.name })) ?? []}
               />
             </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('stockIn.import.paidIn')}</Label>
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+                {(['USD', 'COP'] as PayCurrency[]).map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCurrency(c)}
+                    className={cn('rounded-md py-1.5 text-xs font-semibold', currency === c ? 'bg-background shadow-sm' : 'text-muted-foreground')}
+                  >
+                    {t(`stockIn.import.currency.${c}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{t('stockIn.dialog.quantityLabel')}</Label>
                 <NumberInput value={quantity} onChange={setQuantity} placeholder={t('stockIn.dialog.quantityPlaceholder')} className="h-11" decimal />
               </div>
               <div className="space-y-1.5">
-                <Label>{t('stockIn.dialog.buyPriceLabel')}</Label>
-                <NumberInput value={buyPrice} onChange={setBuyPrice} placeholder={t('stockIn.dialog.buyPricePlaceholder')} className="h-11" decimal />
+                <Label>{currency === 'USD' ? t('stockIn.import.usdPriceLabel') : t('stockIn.dialog.buyPriceLabel')}</Label>
+                <NumberInput value={unitPrice} onChange={setUnitPrice} placeholder={currency === 'USD' ? '24,99' : t('stockIn.dialog.buyPricePlaceholder')} className="h-11" decimal={currency === 'USD'} />
               </div>
             </div>
-            {quantity && buyPrice && (
-              <div className="bg-muted/50 p-3 rounded-xl text-sm">
-                {t('stockIn.dialog.total', { amount: (Number(quantity) * Number(buyPrice)).toLocaleString(numberLocale) })}
+
+            {currency === 'USD' && (
+              <div className="space-y-1.5">
+                <Label>{t('stockIn.import.rateLabel')}</Label>
+                <div className="flex gap-2">
+                  <NumberInput value={rate} onChange={setRate} placeholder="4000" className="h-11 flex-1" decimal />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 gap-1.5 shrink-0"
+                    disabled={rateLoading}
+                    onClick={async () => { const r = await loadRate(); if (r) setRate(String(Math.round(r.rate))); }}
+                  >
+                    <RefreshCw className={cn('w-4 h-4', rateLoading && 'animate-spin')} />
+                    {t('stockIn.import.useTodayRate')}
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {marketRate
+                    ? t('stockIn.import.rateHint', {
+                        rate: formatCurrency(Math.round(marketRate.rate)),
+                        source: marketRate.source === 'trm' ? t('stockIn.import.sourceTrm') : marketRate.source,
+                        date: marketRate.date ?? '',
+                      })
+                    : rateLoading ? t('stockIn.import.rateLoading') : t('stockIn.import.rateManualHint')}
+                </p>
               </div>
             )}
+
+            <div className="space-y-1.5">
+              <Label>{t('stockIn.import.shippingLabel')}</Label>
+              <NumberInput value={shipping} onChange={setShipping} placeholder="0" className="h-11" />
+              <p className="text-[11px] text-muted-foreground">{t('stockIn.import.shippingHint')}</p>
+            </div>
+
+            {qty > 0 && price > 0 && rateNum > 0 && (
+              <div className="bg-muted/50 p-3 rounded-xl text-sm space-y-1">
+                {currency === 'USD' && (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">{formatUsd(qty * price)} × {formatCurrency(rateNum)}</span>
+                    <span>{formatCurrency(cost.productCop)}</span>
+                  </div>
+                )}
+                {cost.shippingCop > 0 && (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">{t('stockIn.import.shipping')}</span>
+                    <span>{formatCurrency(cost.shippingCop)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between gap-2 font-bold">
+                  <span>{t('stockIn.import.totalCop')}</span>
+                  <span>{formatCurrency(cost.totalCop)}</span>
+                </div>
+                <div className="flex justify-between gap-2 text-xs">
+                  <span className="text-muted-foreground">{t('stockIn.import.unitCost')}</span>
+                  <span>{formatCurrency(cost.unitCop)}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label>{t('stockIn.import.tracking')}</Label>
+              <Input value={tracking} onChange={e => setTracking(e.target.value)} placeholder={t('stockIn.import.trackingPlaceholder')} className="h-11" />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+              <div>
+                <p className="text-sm font-semibold flex items-center gap-1.5"><Plane className="w-4 h-4 text-amber-500" /> {t('stockIn.import.inTransitLabel')}</p>
+                <p className="text-[10px] text-muted-foreground">{inTransit ? t('stockIn.import.inTransitOn') : t('stockIn.import.inTransitOff')}</p>
+              </div>
+              <Switch checked={inTransit} onCheckedChange={setInTransit} />
+            </div>
+
             <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
               <div>
                 <p className="text-sm font-semibold">{t('stockIn.dialog.toHomeLabel')}</p>

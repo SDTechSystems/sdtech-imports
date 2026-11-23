@@ -4,6 +4,7 @@ import { db, isStockManaged, type Product, type Category, type Transaction, type
 import { useState, useRef, useEffect } from 'react';
 import { Search, Plus, Minus, ShoppingCart, X, Percent, Tag, CreditCard, Banknote, Check, ScanBarcode, Package as PackageIcon, ClipboardList, Save, Pencil, User, Hash, Trash2, Barcode, Printer } from 'lucide-react';
 import Receipt from '@/components/Receipt';
+import NumberInput from '@/components/NumberInput';
 import KitchenTicket from '@/components/KitchenTicket';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +26,8 @@ import LockedPage from '@/components/LockedPage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 import { getDateLocale } from '@/i18n';
+import { generateVerifyCode, registerReceipt, toPublicReceipt } from '@/lib/receipt-verify';
+import { Truck } from 'lucide-react';
 
 interface CartItem {
   product: Product;
@@ -36,7 +39,7 @@ interface CartItem {
 
 // The cart in progress is kept in localStorage so it survives moving between
 // pages (the Cashier page unmounts) and reloading the app.
-const CART_DRAFT_KEY = 'easydrink_cart_draft';
+const CART_DRAFT_KEY = 'sdtech_cart_draft';
 
 interface CartDraft {
   cart: CartItem[];
@@ -91,6 +94,7 @@ export default function Kasir() {
   const [itemDiscountValue, setItemDiscountValue] = useState('');
   const [paymentMethodId, setPaymentMethodId] = useState<string>('');
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [shippingFee, setShippingFee] = useState(''); // envío cobrado al cliente
   const [useDebt, setUseDebt] = useState(false);
   const [fromHome, setFromHome] = useState(() => initialDraft.fromHome ?? false);
   const [isQuickAdding, setIsQuickAdding] = useState(false);
@@ -152,6 +156,7 @@ export default function Kasir() {
     setTxDiscountValue('');
     setPaymentMethodId('');
     setPaymentAmount('');
+    setShippingFee('');
     setUseDebt(false);
     setFromHome(false);
     setCustomerName('');
@@ -256,7 +261,8 @@ export default function Kasir() {
     : txDiscountType === 'nominal'
       ? Math.min(subtotal, Math.max(0, Number(txDiscountValue) || 0))
       : 0;
-  const total = Math.max(0, subtotal - txDiscountAmount);
+  const shippingAmount = Math.max(0, Math.round(Number(shippingFee) || 0));
+  const total = Math.max(0, subtotal - txDiscountAmount) + shippingAmount;
   const paidAmount = Number(paymentAmount) || 0;
   const checkoutPaidAmount = useDebt ? Math.min(total, Math.max(0, paidAmount)) : paidAmount;
   const debtAmount = useDebt ? Math.max(0, total - checkoutPaidAmount) : 0;
@@ -511,6 +517,8 @@ export default function Kasir() {
         closedAt: new Date(),
         debtAmount,
         soldFromHome: fromHome || undefined,
+        shippingFee: shippingAmount || undefined,
+        verifyCode: (await db.transactions.get(editingTxId))?.verifyCode || generateVerifyCode(),
       });
 
       if (debtAmount > 0) {
@@ -566,6 +574,7 @@ export default function Kasir() {
       if (fromHome) await deductHomeStock();
 
       const updatedTx = await db.transactions.get(editingTxId);
+      if (updatedTx) void registerReceipt(toPublicReceipt(updatedTx, itemRecords, storeSettings?.storeName || 'SD Tech Imports'));
       toast.success(t('cashier.toast.transactionSuccess', { receiptNumber: updatedTx?.receiptNumber }));
       setLastTransaction(updatedTx || null);
       setLastTxItems(itemRecords);
@@ -593,6 +602,8 @@ export default function Kasir() {
         createdBy: currentUser?.id,
         debtAmount,
         soldFromHome: fromHome || undefined,
+        shippingFee: shippingAmount || undefined,
+        verifyCode: generateVerifyCode(),
       };
 
       const txId = await db.transactions.add(txData);
@@ -631,6 +642,7 @@ export default function Kasir() {
       }
       if (fromHome) await deductHomeStock();
 
+      void registerReceipt(toPublicReceipt({ ...txData, id: txId as number }, itemRecords, storeSettings?.storeName || 'SD Tech Imports'));
       toast.success(t('cashier.toast.transactionSuccess', { receiptNumber }));
       setLastTransaction({ ...txData, id: txId as number });
       setLastTxItems(itemRecords);
@@ -1404,6 +1416,22 @@ export default function Kasir() {
                 <Switch checked={fromHome} onCheckedChange={setFromHome} />
               </div>
             )}
+
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium flex items-center gap-1.5"><Truck className="w-4 h-4" /> {t('cashier.checkout.shippingLabel')}</p>
+              <NumberInput
+                value={shippingFee}
+                onChange={(v) => {
+                  setShippingFee(v);
+                  // Si ya estaba el pago exacto, se ajusta al nuevo total.
+                  const newTotal = Math.max(0, subtotal - txDiscountAmount) + Math.max(0, Math.round(Number(v) || 0));
+                  if (!useDebt && Number(paymentAmount) === total) setPaymentAmount(newTotal.toString());
+                }}
+                placeholder="0"
+                className="h-11"
+              />
+              <p className="text-[10px] text-muted-foreground">{t('cashier.checkout.shippingHint')}</p>
+            </div>
 
             <div className="space-y-1.5">
               <p className="text-sm font-medium">{t('cashier.checkout.paymentMethod')}</p>

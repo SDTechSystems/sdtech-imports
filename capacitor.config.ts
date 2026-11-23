@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.freekasir.app',
-  appName: 'EasyDrink',
+  appId: 'com.sdtech.imports',
+  appName: 'SD Tech Imports',
   webDir: 'dist',
   android: {
     allowMixedContent: true,
@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
     StatusBar: {
       overlaysWebView: false,
       style: 'LIGHT',
-      backgroundColor: '#451EB8',
+      backgroundColor: '#001B44',
     },
   },
 };

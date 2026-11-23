@@ -1,4 +1,4 @@
-import { Wallet, AlertTriangle, Infinity as InfinityIcon, Users as UsersIcon, FileSpreadsheet, PackageSearch, Sparkles, Printer, HandCoins, Receipt, ClipboardCheck, LayoutGrid, type LucideIcon } from 'lucide-react';
+import { Plane, QrCode, type LucideIcon } from 'lucide-react';
 import { db } from './db';
 
 /**
@@ -24,101 +24,18 @@ export interface WhatsNewFeature {
 
 export const FEATURES: WhatsNewFeature[] = [
   {
-    id: '2026-06-kitchen-ticket',
-    icon: Printer,
+    id: '2026-11-receipt-qr',
+    icon: QrCode,
     iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-30',
-    cta: { to: '/cashier' },
-  },
-  {
-    id: '2026-06-cashier-layout',
-    icon: LayoutGrid,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-21',
-    cta: { to: '/settings' },
-  },
-  {
-    id: '2026-06-import-excel',
-    icon: FileSpreadsheet,
-    iconColor: 'text-success bg-success/10',
-    publishedAt: '2026-06-20',
-    cta: { to: '/products' },
-  },
-  {
-    id: '2026-06-stock-opname',
-    icon: ClipboardCheck,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-18',
-    cta: { to: '/settings/stock-opname' },
-  },
-  {
-    id: '2026-06-receipt-footer',
-    icon: Receipt,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-18',
+    publishedAt: '2026-11-23',
     cta: { to: '/settings/receipt' },
   },
   {
-    id: '2026-06-customer-debts',
-    icon: HandCoins,
+    id: '2026-11-imports',
+    icon: Plane,
     iconColor: 'text-warning bg-warning/10',
-    publishedAt: '2026-06-15',
-    cta: { to: '/debts' },
-  },
-  {
-    id: '2026-06-print-daily-closing',
-    icon: Printer,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-15',
-    cta: { to: '/reports' },
-  },
-  {
-    id: '2026-06-rebrand-freekasir',
-    icon: Sparkles,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-06-11',
-    cta: { to: '/settings/theme' },
-  },
-  {
-    id: '2026-06-stock-search-scan',
-    icon: PackageSearch,
-    iconColor: 'text-success bg-success/10',
-    publishedAt: '2026-06-10',
+    publishedAt: '2026-11-23',
     cta: { to: '/stock-in' },
-  },
-  {
-    id: '2026-06-export-excel',
-    icon: FileSpreadsheet,
-    iconColor: 'text-success bg-success/10',
-    publishedAt: '2026-06-09',
-    cta: { to: '/reports' },
-  },
-  {
-    id: '2026-05-customers',
-    icon: UsersIcon,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-05-30',
-    cta: { to: '/customers' },
-  },
-  {
-    id: '2026-05-unmanaged-stock',
-    icon: InfinityIcon,
-    iconColor: 'text-primary bg-primary/10',
-    publishedAt: '2026-05-29',
-    cta: { to: '/products' },
-  },
-  {
-    id: '2026-05-expense-tracking',
-    icon: Wallet,
-    iconColor: 'text-warning bg-warning/10',
-    publishedAt: '2026-05-25',
-    cta: { to: '/expenses' },
-  },
-  {
-    id: '2026-05-error-boundary',
-    icon: AlertTriangle,
-    iconColor: 'text-destructive bg-destructive/10',
-    publishedAt: '2026-05-24',
   },
 ];
 

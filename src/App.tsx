@@ -35,6 +35,7 @@ import ReceiptSettings from "./pages/settings/ReceiptSettings";
 import StockOpname from "./pages/settings/StockOpname";
 import BackupRestoreSettings from "./pages/settings/BackupRestoreSettings";
 import NotFound from "./pages/NotFound";
+import VerifyReceipt from "./pages/VerifyReceipt";
 
 const queryClient = new QueryClient();
 
@@ -244,6 +245,7 @@ const App = () => {
                     }
                   />
                 </Route>
+                <Route path="/verificar/:code" element={<ErrorBoundary><VerifyReceipt /></ErrorBoundary>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

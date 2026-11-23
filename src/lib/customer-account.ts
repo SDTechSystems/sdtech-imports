@@ -160,3 +160,8 @@ export function whatsappNumber(phone: string | undefined | null): string | null 
   if (digits.length >= 11) return digits;
   return null;
 }
+
+/** Nombre para mostrar: el nombre, o el teléfono, o "Cliente sin nombre" (ningún dato es obligatorio). */
+export function customerLabel(c: { name?: string; phone?: string; whatsappUser?: string }, fallback = 'Cliente sin nombre'): string {
+  return c.name?.trim() || c.phone?.trim() || (c.whatsappUser ? `@${c.whatsappUser}` : '') || fallback;
+}

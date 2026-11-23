@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import LockedPage from '@/components/LockedPage';
-import { whatsappNumber, normalizeWhatsappUser, whatsappUserUrl } from '@/lib/customer-account';
+import { whatsappNumber, normalizeWhatsappUser, whatsappUserUrl, customerLabel } from '@/lib/customer-account';
 import { canPickContacts, pickContacts, planContactMerge } from '@/lib/contacts-import';
 import { useTranslation } from 'react-i18next';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
@@ -63,7 +63,7 @@ export default function CustomersPage() {
   }
 
   const filtered = customers?.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search) ||
     (c.whatsappUser ?? '').includes(search.toLowerCase().replace(/^@/, '')) ||
     c.email.toLowerCase().includes(search.toLowerCase())
@@ -82,7 +82,11 @@ export default function CustomersPage() {
   };
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    // Nombre y teléfono son opcionales, pero no se guarda un cliente vacío.
+    if (!name.trim() && !phone.trim() && !waUser.trim() && !email.trim() && !notes.trim()) {
+      toast.error(t('customers.dialog.needSomething'));
+      return;
+    }
     const user = normalizeWhatsappUser(waUser);
     if (user === null) {
       toast.error(t('customers.dialog.waUserInvalid'));
@@ -178,7 +182,7 @@ export default function CustomersPage() {
               <CardContent className="p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold">{c.name}</h3>
+                    <h3 className="text-sm font-semibold">{customerLabel(c, t('customers.noName'))}</h3>
                     {c.phone && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Phone className="w-3 h-3" /> {c.phone}
@@ -235,7 +239,7 @@ export default function CustomersPage() {
             <div className="space-y-1.5"><Label>{t('customers.dialog.emailLabel')}</Label><Input value={email} onChange={e => setEmail(e.target.value)} placeholder={t('customers.dialog.emailPlaceholder')} className="h-11" type="email" /></div>
             <div className="space-y-1.5"><Label>{t('customers.dialog.addressLabel')}</Label><Input value={address} onChange={e => setAddress(e.target.value)} placeholder={t('customers.dialog.addressPlaceholder')} className="h-11" /></div>
             <div className="space-y-1.5"><Label>{t('customers.dialog.notesLabel')}</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('customers.dialog.notesPlaceholder')} rows={2} /></div>
-            <Button className="w-full h-11" onClick={handleSave} disabled={!name.trim()}>{t('customers.dialog.save')}</Button>
+            <Button className="w-full h-11" onClick={handleSave}>{t('customers.dialog.save')}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -259,7 +263,7 @@ export default function CustomersPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UsersIcon className="w-4 h-4 text-primary" />
-              {viewCustomer?.name}
+              {viewCustomer ? customerLabel(viewCustomer, t('customers.noName')) : ''}
             </DialogTitle>
           </DialogHeader>
 

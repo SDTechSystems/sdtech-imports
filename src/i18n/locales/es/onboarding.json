@@ -1,7 +1,7 @@
 {
   "slides": {
     "welcome": {
-      "title": "Bienvenido a EasyDrink",
+      "title": "Bienvenido a SD Tech Imports",
       "description": "Una app de punto de venta gratis. Gestiona ventas, stock y reportes financieros, todo en una sola app y desde tu celular, sin complicaciones."
     },
     "cashier": {
@@ -24,13 +24,13 @@
   "install": {
     "installed": "¡Instalada!",
     "title": "Instalar como app",
-    "installedDesc": "EasyDrink está instalada. ¡Puedes abrirla directamente desde tu pantalla de inicio!",
-    "desc": "Instala EasyDrink en tu celular para abrirla directamente desde la pantalla de inicio, sin abrir el navegador.",
+    "installedDesc": "SD Tech Imports está instalada. ¡Puedes abrirla directamente desde tu pantalla de inicio!",
+    "desc": "Instala SD Tech Imports en tu celular para abrirla directamente desde la pantalla de inicio, sin abrir el navegador.",
     "button": "Instalar como app",
     "continueBrowser": "Continuar en el navegador",
     "chromeHint": "Para instalar, ábrela en Chrome y toca el menú (⋮) → \"Agregar a la pantalla principal\" o \"Instalar app\".",
     "safariHint": "En Safari iOS: toca el botón Compartir (↑) → \"Agregar a inicio\"",
-    "success": "¡EasyDrink se instaló correctamente!"
+    "success": "¡SD Tech Imports se instaló correctamente!"
   },
   "store": {
     "title": "Configura tu tienda",

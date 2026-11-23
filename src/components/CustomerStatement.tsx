@@ -123,7 +123,7 @@ export default function CustomerStatement({ open, onOpenChange, storeName, custo
                 <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>{storeName}</div>
                 <div style={{ fontSize: 12, opacity: 0.9 }}>{t('statement.title')} · {today}</div>
               </div>
-              <img src="/easydrink-logo-circle.png" alt="EasyDrink" width={64} height={64} style={{ width: 64, height: 64, flexShrink: 0 }} />
+              <img src="/sdtech-logo-circle.png" alt="SD Tech Imports" width={64} height={64} style={{ width: 64, height: 64, flexShrink: 0 }} />
             </div>
             <div style={{ marginTop: 14, fontSize: 13 }}>
               <span style={{ color: '#6B7280' }}>{t('statement.customer')}: </span>

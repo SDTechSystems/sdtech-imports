@@ -66,7 +66,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const [loadDummy, setLoadDummy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [restoring, setRestoring] = useState(false);
-  const [themeColor, setThemeColorState] = useState('255');
+  const [themeColor, setThemeColorState] = useState('205');
   const [installDone, setInstallDone] = useState(false);
   const { canInstall, isInstalled, install } = usePWAInstall();
 
@@ -272,7 +272,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     <>
                       <img
                         src="/header-icon.png"
-                        alt="EasyDrink"
+                        alt="SD Tech Imports"
                         className="w-28 h-28 object-contain"
                       />
                       <div className="space-y-3">

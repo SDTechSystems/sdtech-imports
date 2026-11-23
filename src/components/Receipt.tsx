@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import QRCode from 'qrcode';
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { Download, Share2, Printer, Utensils } from 'lucide-react';
@@ -12,6 +13,7 @@ import { Capacitor } from '@capacitor/core';
 import { downloadOrShareFile } from '@/lib/file-utils';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 import { getDateLocale } from '@/i18n';
+import { getVerifyBaseUrl, verifyUrl as buildVerifyUrl } from '@/lib/receipt-verify';
 
 interface ReceiptProps {
   open: boolean;
@@ -34,6 +36,19 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
   const rp = (n: number) => `${CURRENCY_SYMBOL} ${n.toLocaleString(numberLocale)}`;
 
   const storeName = storeSettings?.storeName || t('receipt.storeFallback');
+
+  // QR para verificar la autenticidad del recibo en línea.
+  const verifyBase = getVerifyBaseUrl(storeSettings);
+  const verifyLink = transaction.verifyCode && verifyBase ? buildVerifyUrl(verifyBase, transaction.verifyCode) : '';
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  useEffect(() => {
+    if (!verifyLink) { setQrDataUrl(''); return; }
+    let cancelled = false;
+    QRCode.toDataURL(verifyLink, { margin: 1, width: 240, errorCorrectionLevel: 'M' })
+      .then((url) => { if (!cancelled) setQrDataUrl(url); })
+      .catch(() => setQrDataUrl(''));
+    return () => { cancelled = true; };
+  }, [verifyLink]);
 
   const captureReceipt = async (): Promise<HTMLCanvasElement | null> => {
     if (!receiptRef.current) return null;
@@ -129,6 +144,7 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
       paymentMethodName, 
       cashierName,
       language: i18n.language,
+      verifyUrl: verifyLink || undefined,
     };
 
     if (isNativePlatform()) {
@@ -222,7 +238,7 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
             {storeSettings?.logo ? (
               <img src={storeSettings.logo} alt={t('receipt.logoAlt')} className="w-16 h-16 object-contain mx-auto mb-1" />
             ) : (
-              <img src="/easydrink-logo.png" alt={t('receipt.logoAlt')} className="w-36 h-auto object-contain mx-auto mb-2" />
+              <img src="/sdtech-logo.png" alt={t('receipt.logoAlt')} className="w-36 h-auto object-contain mx-auto mb-2" />
             )}
             <p className="font-bold text-sm">{storeName}</p>
             {storeSettings?.address && <p className="text-[10px]">{storeSettings.address}</p>}
@@ -294,6 +310,12 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
                 <span>-{rp(transaction.discountAmount)}</span>
               </div>
             )}
+            {!!transaction.shippingFee && transaction.shippingFee > 0 && (
+              <div className="flex justify-between">
+                <span>{t('receipt.shipping')}</span>
+                <span>{rp(transaction.shippingFee)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold text-xs border-t border-dashed border-gray-400 pt-1 mt-1">
               <span>{t('receipt.total')}</span>
               <span>{rp(transaction.total)}</span>
@@ -321,6 +343,15 @@ export default function Receipt({ open, onClose, transaction, items, storeSettin
           <p className="text-center text-[10px] text-gray-500">
             {storeSettings?.receiptFooter || t('receipt.footerFallback')}
           </p>
+
+          {/* QR de verificación */}
+          {qrDataUrl && (
+            <div className="mt-2 flex flex-col items-center gap-1">
+              <img src={qrDataUrl} alt={t('receipt.verifyAlt')} width={120} height={120} style={{ width: 120, height: 120 }} />
+              <p className="text-[9px] text-gray-500 text-center">{t('receipt.verifyHint')}</p>
+              <p className="text-[10px] font-bold tracking-widest">{transaction.verifyCode}</p>
+            </div>
+          )}
 
           {/* Watermark */}
           {!storeSettings?.hideWatermark && (

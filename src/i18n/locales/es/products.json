@@ -76,7 +76,7 @@
     "flashUnsupported": "Este dispositivo no admite el flash",
     "httpsRequired": "La app debe abrirse por HTTPS para usar la cámara.",
     "browserUnsupported": "El navegador no permite acceder a la cámara. Intenta actualizar la app o usa otro navegador.",
-    "permissionDeniedNative": "Permiso de cámara denegado. Ve a Ajustes del dispositivo > Aplicaciones > EasyDrink > Permisos y activa la Cámara.",
+    "permissionDeniedNative": "Permiso de cámara denegado. Ve a Ajustes del dispositivo > Aplicaciones > SD Tech Imports > Permisos y activa la Cámara.",
     "permissionDeniedWeb": "Permiso de cámara denegado. Haz clic en el ícono del candado en la barra de direcciones y permite el acceso a la cámara.",
     "permissionDeniedGeneric": "Permiso de cámara denegado. Permite el acceso a la cámara e inténtalo de nuevo.",
     "noCamera": "No se encontró ninguna cámara en este dispositivo.",

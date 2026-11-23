@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 
 // Predefined theme color options with HSL values
 export const THEME_COLORS = [
-  { name: 'EasyDrink', hue: '255', saturation: '72%', lightness: '42%' },
+  { name: 'SD Tech Imports', hue: '205', saturation: '100%', lightness: '35%' },
   { name: 'Biru', hue: '215', saturation: '100%', lightness: '50%' },
   { name: 'Oranye', hue: '25', saturation: '95%', lightness: '53%' },
   { name: 'Hijau', hue: '142', saturation: '71%', lightness: '45%' },

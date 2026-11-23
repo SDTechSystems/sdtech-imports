@@ -134,7 +134,7 @@ describe('getESCPOSData formatting', () => {
     });
 
     expect(output).toContain('Impreso desde la app');
-    expect(output).toContain('EasyDrink');
+    expect(output).toContain('SD Tech Imports');
   });
 
   it('should hide the watermark when hideWatermark is true', () => {
@@ -157,7 +157,7 @@ describe('getESCPOSData formatting', () => {
     });
 
     expect(output).not.toContain('Impreso desde la app');
-    expect(output).not.toContain('EasyDrink');
+    expect(output).not.toContain('SD Tech Imports');
   });
 
   it('should hide the watermark when hideWatermark is true without any cloud store', () => {
@@ -181,7 +181,7 @@ describe('getESCPOSData formatting', () => {
     });
 
     expect(output).not.toContain('Impreso desde la app');
-    expect(output).not.toContain('EasyDrink');
+    expect(output).not.toContain('SD Tech Imports');
   });
 
   it('should print labels in English when language is en', () => {

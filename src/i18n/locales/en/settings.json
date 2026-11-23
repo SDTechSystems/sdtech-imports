@@ -6,7 +6,7 @@
     "title": "Install as App",
     "hint": "Open directly from home screen, no browser needed",
     "installButton": "Install",
-    "installSuccess": "EasyDrink installed successfully!",
+    "installSuccess": "SD Tech Imports installed successfully!",
     "helpButton": "How to Install"
   },
   "installHelp": {
@@ -86,7 +86,7 @@
       "description": "{{count}} unpaid debts"
     },
     "stockIn": {
-      "title": "Stock In",
+      "title": "Purchases & imports",
       "description": "Record incoming stock & auto COGS"
     },
     "stockOut": {
@@ -164,10 +164,10 @@
     "title": "Language / Bahasa"
   },
   "about": {
-    "appName": "EasyDrink",
+    "appName": "SD Tech Imports",
     "tagline": "Free POS for small businesses 🇨🇴",
     "version": "v{{version}} • Data stored on device",
-    "whatsNew": "What's New in EasyDrink",
+    "whatsNew": "What's New in SD Tech Imports",
     "storageUsed": "Storage Used"
   },
   "storeDialog": {
@@ -335,7 +335,7 @@
     "dialog": {
       "addTitle": "Add Customer",
       "editTitle": "Edit Customer",
-      "nameLabel": "Customer Name *",
+      "nameLabel": "Customer name",
       "namePlaceholder": "e.g. Budi Santoso",
       "phoneLabel": "WhatsApp / phone",
       "phonePlaceholder": "08123456789",
@@ -349,7 +349,8 @@
       "waUserLabel": "WhatsApp username (@)",
       "waUserPlaceholder": "@username or wa.me/username link",
       "waUserHint": "Optional. Paste the @ or the link the customer shares from their WhatsApp profile. If they set a username key, WhatsApp will ask for it when the chat opens.",
-      "waUserInvalid": "That WhatsApp username is not valid. Use letters, numbers, dots or underscores (3 to 35 characters)."
+      "waUserInvalid": "That WhatsApp username is not valid. Use letters, numbers, dots or underscores (3 to 35 characters).",
+      "needSomething": "Enter at least one detail: name, phone or notes."
     },
     "deleteDialog": {
       "title": "Delete Customer?",
@@ -378,7 +379,8 @@
       "unsupported": "To import phone contacts, open the app in Chrome on Android.",
       "result": "Done: {{updated}} customers updated and {{created}} new",
       "error": "Contacts could not be read"
-    }
+    },
+    "noName": "Unnamed customer"
   },
   "debts": {
     "locked": {
@@ -439,7 +441,7 @@
       "title": "Stock In",
       "permissionLabel": "Stock In / Stock Out"
     },
-    "title": "Stock In",
+    "title": "Purchases & imports",
     "add": "Add",
     "supplierFilter": {
       "placeholder": "Filter Supplier",
@@ -449,14 +451,14 @@
     "count_zero": "{{count}} records",
     "count_one": "{{count}} record",
     "count_other": "{{count}} records",
-    "empty": "No stock in data yet",
+    "empty": "No purchases yet",
     "item": {
       "fromSupplier": "from {{supplier}}",
       "quantity": "+{{qty}}",
       "unitPrice": "@ $ {{price}}"
     },
     "dialog": {
-      "title": "Add Stock In",
+      "title": "Record purchase",
       "productLabel": "Product *",
       "supplierLabel": "Supplier *",
       "quantityLabel": "Quantity *",
@@ -466,13 +468,69 @@
       "notesLabel": "Notes",
       "notesPlaceholder": "Optional",
       "total": "Total: $ {{amount}}",
-      "save": "Save Stock In",
+      "save": "Save purchase",
       "toHomeLabel": "Keep at home",
-      "toHomeDesc": "These units go to the stock you keep at home"
+      "toHomeDesc": "These units go to the stock you keep at home",
+      "supplierLabelOptional": "Supplier"
     },
     "toast": {
       "fillAll": "Please complete all fields",
       "success": "Stock {{product}} increased by {{qty}}. COGS: $ {{hpp}}"
+    },
+    "import": {
+      "filter": {
+        "all": "All",
+        "in_transit": "In transit",
+        "received": "Received"
+      },
+      "originLabel": "Origin",
+      "origin": {
+        "US": "USA",
+        "CN": "China",
+        "CO": "Colombia",
+        "OTHER": "Other"
+      },
+      "supplierPlaceholder": "Amazon, AliExpress… (optional)",
+      "paidIn": "Paid in",
+      "currency": {
+        "USD": "Dollars (US$)",
+        "COP": "Pesos ($)"
+      },
+      "usdPriceLabel": "Unit price in US$ *",
+      "rateLabel": "Dollar rate (pesos per US$) *",
+      "useTodayRate": "Today",
+      "rateHint": "Dollar today: {{rate}} ({{source}} {{date}}). If you bought the dollars at another rate, enter that one.",
+      "rateLoading": "Checking today's dollar rate…",
+      "rateManualHint": "Enter the rate at which you bought the dollars.",
+      "rateError": "Couldn't get today's rate. Enter it manually.",
+      "sourceTrm": "official TRM",
+      "shippingLabel": "Shipping cost (pesos)",
+      "shippingHint": "Enter it manually: mailbox, freight or courier. It is split across the units.",
+      "shipping": "Shipping",
+      "totalCop": "Total in pesos",
+      "unitCost": "Cost per unit",
+      "tracking": "Tracking or order number",
+      "trackingPlaceholder": "e.g. 112-1234567-1234567",
+      "inTransitLabel": "Still in transit",
+      "inTransitOn": "Not added to stock until you mark it as received.",
+      "inTransitOff": "Already arrived: added to stock right away.",
+      "statusTransit": "In transit",
+      "statusReceived": "Received",
+      "receiveShort": "Arrived",
+      "savedInTransit": "{{product}} (×{{qty}}) is in transit. Mark it when it arrives.",
+      "quantity": "Quantity",
+      "paidOn": "Paid on",
+      "daysInTransit": "On the way",
+      "receivedOn": "Received on",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "supplier": "Supplier",
+      "usdLine": "{{usd}} × {{rate}}",
+      "receiveHint": "Marking it as received makes the units available for sale and updates the average cost.",
+      "markReceived": "Arrived: mark as received",
+      "alreadyReceived": "Already received and available in stock.",
+      "receivedToast": "{{product}} (+{{qty}}) is now available for sale.",
+      "receiveError": "Couldn't mark it as received."
     }
   },
   "stockOut": {
@@ -808,7 +866,9 @@
       "changeLabel": "Change",
       "confirmButton": "Confirm Transaction",
       "fromHomeLabel": "Taken from home stock",
-      "fromHomeDesc": "Deduct these units from the stock you keep at home"
+      "fromHomeDesc": "Deduct these units from the stock you keep at home",
+      "shippingLabel": "Delivery to customer (optional)",
+      "shippingHint": "Enter it based on distance. Added to the total but not counted as profit."
     },
     "discountDialog": {
       "title": "Transaction Discount",
@@ -892,7 +952,7 @@
     }
   },
   "loginScreen": {
-    "storeFallback": "EasyDrink",
+    "storeFallback": "SD Tech Imports",
     "continuePrompt": "Sign in to continue",
     "usernameLabel": "Username",
     "usernamePlaceholder": "e.g. budi",
@@ -928,7 +988,7 @@
     "print": "Print",
     "printKitchen": "Print Kitchen",
     "watermarkLine1": "Printed From",
-    "watermarkLine2": "EasyDrink App",
+    "watermarkLine2": "SD Tech Imports App",
     "done": "Done",
     "toast": {
       "captureError": "Failed to create receipt image",
@@ -941,7 +1001,11 @@
     },
     "shareTitle": "Receipt {{receiptNumber}}",
     "shareText": "Receipt from {{storeName}}",
-    "whatsappFallback": "*{{storeName}}*\nReceipt: {{receiptNumber}}\nTotal: {{total}}\nDate: {{date}}"
+    "whatsappFallback": "*{{storeName}}*\nReceipt: {{receiptNumber}}\nTotal: {{total}}\nDate: {{date}}",
+    "shipping": "Shipping",
+    "verifyAlt": "QR to verify the receipt",
+    "verifyHint": "Scan to verify this receipt is authentic",
+    "verifyNoUrl": "To print a QR, set the public address in Settings → Receipt."
   },
   "users": {
     "notEnabled": {
@@ -1020,8 +1084,8 @@
     "lastBackup": "Last backup: {{time}}",
     "neverBackedUp": "You have not backed up data yet",
     "backupNow": "Backup Now",
-    "shareTitle": "Backup EasyDrink",
-    "shareText": "EasyDrink backup data file (JSON)",
+    "shareTitle": "Backup SD Tech Imports",
+    "shareText": "SD Tech Imports backup data file (JSON)",
     "shareDialogTitle": "Save / Share Backup",
     "successCreated": "Backup created successfully!",
     "successDownloaded": "Backup downloaded successfully",
@@ -1119,9 +1183,11 @@
     "printLogoDescription": "Print the store logo at the very top of the physical receipt. Ensure your thermal printer supports image/bitmap printing.",
     "footerLabel": "Receipt Footer Text",
     "hideWatermarkLabel": "Hide Application Watermark",
-    "hideWatermarkDescActive": "Hide the \"Printed From EasyDrink App\" watermark at the bottom of the receipt.",
+    "hideWatermarkDescActive": "Hide the \"Printed From SD Tech Imports App\" watermark at the bottom of the receipt.",
     "saveSuccess": "Receipt settings saved successfully",
-    "saveFailed": "Failed to save receipt settings"
+    "saveFailed": "Failed to save receipt settings",
+    "verifyUrlLabel": "Public address (verification QR)",
+    "verifyUrlDesc": "Each receipt carries a QR that opens this address to check it is authentic. In the browser the current address is used; in the Android app enter your Cloudflare address here."
   },
   "kitchenTicket": {
     "title": "Kitchen Ticket",

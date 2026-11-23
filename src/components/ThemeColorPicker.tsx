@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const THEME_COLOR_KEYS: Record<string, string> = {
-  '255': 'easydrink',
+  '205': 'brand',
   '215': 'blue',
   '25': 'orange',
   '142': 'green',

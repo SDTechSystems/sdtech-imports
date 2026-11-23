@@ -6,7 +6,7 @@
     "title": "Instalar como aplicación",
     "hint": "Ábrela directamente desde la pantalla de inicio, sin navegador",
     "installButton": "Instalar",
-    "installSuccess": "¡EasyDrink se instaló correctamente!",
+    "installSuccess": "¡SD Tech Imports se instaló correctamente!",
     "helpButton": "Cómo instalar"
   },
   "installHelp": {
@@ -86,8 +86,8 @@
       "description": "{{count}} deudas pendientes"
     },
     "stockIn": {
-      "title": "Entrada de inventario",
-      "description": "Registra entradas de inventario y costo automático"
+      "title": "Compras e importaciones",
+      "description": "Compras en dólares, envíos en tránsito y costo automático"
     },
     "stockOut": {
       "title": "Salida de inventario",
@@ -164,10 +164,10 @@
     "title": "Idioma / Language"
   },
   "about": {
-    "appName": "EasyDrink",
+    "appName": "SD Tech Imports",
     "tagline": "POS gratuito para micro y pequeños negocios 🇨🇴",
     "version": "v{{version}} • Datos guardados en el dispositivo",
-    "whatsNew": "Novedades de EasyDrink",
+    "whatsNew": "Novedades de SD Tech Imports",
     "storageUsed": "Almacenamiento usado"
   },
   "storeDialog": {
@@ -335,7 +335,7 @@
     "dialog": {
       "addTitle": "Agregar cliente",
       "editTitle": "Editar cliente",
-      "nameLabel": "Nombre del cliente *",
+      "nameLabel": "Nombre del cliente",
       "namePlaceholder": "p. ej. Carlos Gómez",
       "phoneLabel": "WhatsApp / teléfono",
       "phonePlaceholder": "3001234567",
@@ -349,7 +349,8 @@
       "waUserLabel": "Usuario de WhatsApp (@)",
       "waUserPlaceholder": "@usuario o enlace wa.me/usuario",
       "waUserHint": "Opcional. Pega el @ o el enlace que comparte el cliente desde su perfil de WhatsApp. Si tiene clave de usuario, WhatsApp te la pedirá al abrir el chat.",
-      "waUserInvalid": "El usuario de WhatsApp no es válido. Usa letras, números, punto o guion bajo (3 a 35 caracteres)."
+      "waUserInvalid": "El usuario de WhatsApp no es válido. Usa letras, números, punto o guion bajo (3 a 35 caracteres).",
+      "needSomething": "Escribe al menos un dato: nombre, teléfono o notas."
     },
     "deleteDialog": {
       "title": "¿Eliminar cliente?",
@@ -378,7 +379,8 @@
       "unsupported": "Para importar contactos del teléfono, abre la app en Chrome de Android.",
       "result": "Listo: {{updated}} clientes actualizados y {{created}} nuevos",
       "error": "No se pudieron leer los contactos"
-    }
+    },
+    "noName": "Cliente sin nombre"
   },
   "debts": {
     "locked": {
@@ -439,7 +441,7 @@
       "title": "Entrada de inventario",
       "permissionLabel": "Entrada / salida de inventario"
     },
-    "title": "Entrada de inventario",
+    "title": "Compras e importaciones",
     "add": "Agregar",
     "supplierFilter": {
       "placeholder": "Filtrar proveedor",
@@ -449,14 +451,14 @@
     "count_zero": "{{count}} registros",
     "count_one": "{{count}} registro",
     "count_other": "{{count}} registros",
-    "empty": "Aún no hay entradas de inventario",
+    "empty": "Aún no hay compras registradas",
     "item": {
       "fromSupplier": "de {{supplier}}",
       "quantity": "+{{qty}}",
       "unitPrice": "@ $ {{price}}"
     },
     "dialog": {
-      "title": "Agregar entrada de inventario",
+      "title": "Registrar compra",
       "productLabel": "Producto *",
       "supplierLabel": "Proveedor *",
       "quantityLabel": "Cantidad *",
@@ -466,13 +468,69 @@
       "notesLabel": "Notas",
       "notesPlaceholder": "Opcional",
       "total": "Total: $ {{amount}}",
-      "save": "Guardar entrada",
+      "save": "Guardar compra",
       "toHomeLabel": "Guardar en casa",
-      "toHomeDesc": "Estas unidades quedan en el inventario de casa"
+      "toHomeDesc": "Estas unidades quedan en el inventario de casa",
+      "supplierLabelOptional": "Proveedor"
     },
     "toast": {
       "fillAll": "Completa todos los campos",
       "success": "Inventario de {{product}} aumentó en {{qty}}. Costo: $ {{hpp}}"
+    },
+    "import": {
+      "filter": {
+        "all": "Todas",
+        "in_transit": "En tránsito",
+        "received": "Recibidas"
+      },
+      "originLabel": "Origen",
+      "origin": {
+        "US": "EE. UU.",
+        "CN": "China",
+        "CO": "Colombia",
+        "OTHER": "Otro"
+      },
+      "supplierPlaceholder": "Amazon, AliExpress… (opcional)",
+      "paidIn": "Pagué en",
+      "currency": {
+        "USD": "Dólares (US$)",
+        "COP": "Pesos ($)"
+      },
+      "usdPriceLabel": "Precio/unidad en US$ *",
+      "rateLabel": "Tasa del dólar (pesos por US$) *",
+      "useTodayRate": "Hoy",
+      "rateHint": "Dólar hoy: {{rate}} ({{source}} {{date}}). Si compraste los dólares en Morse a otra tasa, escribe esa.",
+      "rateLoading": "Consultando el dólar de hoy…",
+      "rateManualHint": "Escribe la tasa a la que compraste los dólares.",
+      "rateError": "No se pudo consultar el dólar de hoy. Escribe la tasa a mano.",
+      "sourceTrm": "TRM oficial",
+      "shippingLabel": "Costo de envío (pesos)",
+      "shippingHint": "Escríbelo a mano: casillero, flete o mensajería. Se reparte entre las unidades.",
+      "shipping": "Envío",
+      "totalCop": "Total en pesos",
+      "unitCost": "Costo por unidad",
+      "tracking": "Guía o número de pedido",
+      "trackingPlaceholder": "Ej. 112-1234567-1234567",
+      "inTransitLabel": "Sigue en tránsito",
+      "inTransitOn": "No se suma al inventario hasta que lo marques como recibido.",
+      "inTransitOff": "Ya llegó: se suma al inventario de una vez.",
+      "statusTransit": "En tránsito",
+      "statusReceived": "Recibido",
+      "receiveShort": "Llegó",
+      "savedInTransit": "{{product}} (×{{qty}}) quedó en tránsito. Márcalo cuando llegue.",
+      "quantity": "Cantidad",
+      "paidOn": "Pagado el",
+      "daysInTransit": "En camino",
+      "receivedOn": "Recibido el",
+      "days_one": "{{count}} día",
+      "days_other": "{{count}} días",
+      "supplier": "Proveedor",
+      "usdLine": "{{usd}} × {{rate}}",
+      "receiveHint": "Al marcarlo como recibido las unidades quedan disponibles para vender y se recalcula el costo promedio.",
+      "markReceived": "Llegó: marcar como recibido",
+      "alreadyReceived": "Ya está recibido y disponible en el inventario.",
+      "receivedToast": "{{product}} (+{{qty}}) ya está disponible para vender.",
+      "receiveError": "No se pudo marcar como recibido."
     }
   },
   "stockOut": {
@@ -748,7 +806,7 @@
     "scanPlaceholder": "Escanea / escribe el SKU o código de barras y presiona Enter...",
     "categoryAll": "Todas",
     "empty": {
-      "outOfStock": "Todos los productos están agotados. Agrega inventario primero en el menú Entrada de inventario.",
+      "outOfStock": "Todos los productos están agotados. Registra una compra primero en Compras e importaciones.",
       "noProducts": "Aún no hay productos. Agrégalos primero en el menú Productos."
     },
     "productCard": {
@@ -808,7 +866,9 @@
       "changeLabel": "Cambio",
       "confirmButton": "Confirmar transacción",
       "fromHomeLabel": "Sale del inventario de casa",
-      "fromHomeDesc": "Descuenta estas unidades de lo que tienes en casa"
+      "fromHomeDesc": "Descuenta estas unidades de lo que tienes en casa",
+      "shippingLabel": "Envío al cliente (opcional)",
+      "shippingHint": "Escríbelo según la distancia. Se suma al total pero no cuenta como ganancia."
     },
     "discountDialog": {
       "title": "Descuento de la transacción",
@@ -892,7 +952,7 @@
     }
   },
   "loginScreen": {
-    "storeFallback": "EasyDrink",
+    "storeFallback": "SD Tech Imports",
     "continuePrompt": "Inicia sesión para continuar",
     "usernameLabel": "Usuario",
     "usernamePlaceholder": "p. ej. carlos",
@@ -928,7 +988,7 @@
     "print": "Imprimir",
     "printKitchen": "Imprimir comanda",
     "watermarkLine1": "Impreso desde",
-    "watermarkLine2": "la app EasyDrink",
+    "watermarkLine2": "la app SD Tech Imports",
     "done": "Listo",
     "toast": {
       "captureError": "No se pudo crear la imagen del recibo",
@@ -941,7 +1001,11 @@
     },
     "shareTitle": "Recibo {{receiptNumber}}",
     "shareText": "Recibo de {{storeName}}",
-    "whatsappFallback": "*{{storeName}}*\nRecibo: {{receiptNumber}}\nTotal: {{total}}\nFecha: {{date}}"
+    "whatsappFallback": "*{{storeName}}*\nRecibo: {{receiptNumber}}\nTotal: {{total}}\nFecha: {{date}}",
+    "shipping": "Envío",
+    "verifyAlt": "QR para verificar el recibo",
+    "verifyHint": "Escanea para verificar que este recibo es auténtico",
+    "verifyNoUrl": "Para que el recibo lleve QR, configura la dirección pública en Ajustes → Recibo."
   },
   "users": {
     "notEnabled": {
@@ -1020,8 +1084,8 @@
     "lastBackup": "Última copia de seguridad: {{time}}",
     "neverBackedUp": "Aún no has hecho una copia de seguridad",
     "backupNow": "Hacer copia ahora",
-    "shareTitle": "Copia de seguridad EasyDrink",
-    "shareText": "Archivo de copia de seguridad de EasyDrink (JSON)",
+    "shareTitle": "Copia de seguridad SD Tech Imports",
+    "shareText": "Archivo de copia de seguridad de SD Tech Imports (JSON)",
     "shareDialogTitle": "Guardar / compartir copia de seguridad",
     "successCreated": "¡Copia de seguridad creada correctamente!",
     "successDownloaded": "Copia de seguridad descargada correctamente",
@@ -1119,9 +1183,11 @@
     "printLogoDescription": "Imprime el logo de la tienda en la parte superior del recibo físico. Asegúrate de que tu impresora térmica admita la impresión de imágenes/mapas de bits.",
     "footerLabel": "Texto del pie del recibo",
     "hideWatermarkLabel": "Ocultar marca de agua de la aplicación",
-    "hideWatermarkDescActive": "Oculta la marca de agua \"Impreso desde la app EasyDrink\" en la parte inferior del recibo.",
+    "hideWatermarkDescActive": "Oculta la marca de agua \"Impreso desde la app SD Tech Imports\" en la parte inferior del recibo.",
     "saveSuccess": "Ajustes del recibo guardados correctamente",
-    "saveFailed": "No se pudieron guardar los ajustes del recibo"
+    "saveFailed": "No se pudieron guardar los ajustes del recibo",
+    "verifyUrlLabel": "Dirección pública (QR de verificación)",
+    "verifyUrlDesc": "Cada recibo lleva un QR que abre esta dirección para comprobar que es auténtico. En el navegador se usa la dirección actual; en la app de Android escribe aquí la de tu Cloudflare."
   },
   "kitchenTicket": {
     "title": "Comanda",

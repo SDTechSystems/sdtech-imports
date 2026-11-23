@@ -1,3 +1,4 @@
+import { customerLabel } from '@/lib/customer-account';
 import { useState, useRef, useEffect } from 'react';
 import { User, Check, Plus } from 'lucide-react';
 import { db, type Customer } from '@/lib/db';
@@ -34,15 +35,15 @@ export default function CustomerPicker({ customers, value, customerId, onChange,
   const query = value.trim().toLowerCase();
   const matches = query
     ? customers.filter(c =>
-        c.name.toLowerCase().includes(query) || c.phone.includes(value.trim()),
+        (c.name || '').toLowerCase().includes(query) || c.phone.includes(value.trim()),
       )
     : customers;
 
-  const exactMatch = customers.some(c => c.name.trim().toLowerCase() === query);
+  const exactMatch = customers.some(c => (c.name || '').trim().toLowerCase() === query);
   const canQuickCreate = query.length > 0 && !exactMatch;
 
   const selectCustomer = (c: Customer) => {
-    onChange(c.name, c.id);
+    onChange(customerLabel(c), c.id);
     setOpen(false);
   };
 
@@ -100,7 +101,7 @@ export default function CustomerPicker({ customers, value, customerId, onChange,
               className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/60 transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{c.name}</p>
+                <p className="text-sm font-medium truncate">{customerLabel(c)}</p>
                 {c.phone && <p className="text-[10px] text-muted-foreground truncate">{c.phone}</p>}
               </div>
               {customerId === c.id && <Check className="w-3.5 h-3.5 text-success shrink-0" />}

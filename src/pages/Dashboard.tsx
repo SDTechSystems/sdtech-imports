@@ -1,13 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, isStockManaged, type TransactionItemRecord } from '@/lib/db';
 import { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Package, BarChart3, TrendingUp, AlertTriangle, Receipt, ChevronRight, ClipboardList, Wallet, HandCoins } from 'lucide-react';
+import { ShoppingCart, Package, BarChart3, TrendingUp, AlertTriangle, Receipt, ChevronRight, ClipboardList, Wallet, HandCoins, Plane } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import BackupReminder, { shouldShowBackupReminder, exportBackupData } from '@/components/BackupReminder';
 import WhatsNewModal from '@/components/WhatsNewModal';
+import InTransitPanel from '@/components/InTransitPanel';
 import { getUnseenFeatures } from '@/lib/whats-new';
 import { useAuth } from '@/hooks/use-auth';
 import type { PermissionKey } from '@/lib/db';
@@ -105,6 +106,7 @@ export default function Dashboard() {
   const quickActions: { to: string; icon: typeof ShoppingCart; label: string; color: string; perm?: PermissionKey }[] = [
     { to: '/cashier', icon: ShoppingCart, label: t('quickActions.cashier'), color: 'bg-primary/10 text-primary', perm: 'create_transaction' },
     { to: '/products', icon: Package, label: t('quickActions.products'), color: 'bg-accent/10 text-accent' },
+    { to: '/stock-in', icon: Plane, label: t('quickActions.purchase'), color: 'bg-amber-500/10 text-amber-600', perm: 'manage_stock_inout' },
     { to: '/reports', icon: BarChart3, label: t('quickActions.reports'), color: 'bg-success/10 text-success', perm: 'view_reports' },
   ];
   const visibleActions = quickActions.filter((a) => !a.perm || can(a.perm));
@@ -162,6 +164,9 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Compras en tránsito */}
+      {can('manage_stock_inout') && <InTransitPanel />}
+
       {/* Open Bills */}
       {openBillsCount != null && openBillsCount > 0 && (
         <Link to="/cashier" state={{ openBills: true }} className="block">
@@ -202,7 +207,7 @@ export default function Dashboard() {
       {visibleActions.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">{t('quickActions.title')}</h2>
-          <div className={`grid gap-3 ${visibleActions.length === 1 ? 'grid-cols-1' : visibleActions.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+          <div className={`grid gap-3 ${visibleActions.length === 1 ? 'grid-cols-1' : visibleActions.length === 2 ? 'grid-cols-2' : visibleActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
             {visibleActions.map(({ to, icon: Icon, label, color }) => (
               <Link key={to} to={to}>
                 <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">

@@ -1,6 +1,6 @@
 {
   // Publica la app (dist/) y la API de copias en la nube (worker/index.ts).
-  "name": "easydrink",
+  "name": "sdtech-imports",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-11-13",
   "assets": {

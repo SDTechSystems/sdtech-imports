@@ -1,6 +1,6 @@
 {
   "title": {
-    "storeNameFallback": "EasyDrink"
+    "storeNameFallback": "SD Tech Imports"
   },
   "stats": {
     "salesToday": "Ventas de hoy",
@@ -17,7 +17,8 @@
     "title": "Acceso rápido",
     "cashier": "Caja",
     "products": "Productos",
-    "reports": "Reportes"
+    "reports": "Reportes",
+    "purchase": "Compra"
   },
   "recentTransactions": {
     "title": "Transacciones recientes",
@@ -31,5 +32,17 @@
   "receivable": {
     "title": "Por cobrar: {{amount}}",
     "description": "{{count}} clientes te deben · toca para ver sus cuentas"
+  },
+  "inTransit": {
+    "title": "Pedidos en camino",
+    "viewAll": "Ver compras",
+    "empty": "No tienes pedidos en tránsito.",
+    "add": "Registrar compra",
+    "summary_one": "{{count}} pedido en camino · {{amount}} invertidos",
+    "summary_other": "{{count}} pedidos en camino · {{amount}} invertidos",
+    "line": "×{{qty}} · pagado hace {{days}}",
+    "days_one": "{{count}} día",
+    "days_other": "{{count}} días",
+    "open": "Abrir"
   }
 }

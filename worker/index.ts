@@ -1,5 +1,13 @@
 /**
- * EasyDrink — API de copias de seguridad en la nube (Cloudflare Workers + KV).
+ * SD Tech Imports — API en la nube (Cloudflare Workers + KV).
+ *
+ * Además de las copias de seguridad:
+ *   GET    /api/rate             tasa del dólar del día (TRM oficial), pública
+ *   POST   /api/receipts         registra un recibo para su QR (requiere clave)
+ *   DELETE /api/receipts/<cód>   marca un recibo como anulado (requiere clave)
+ *   GET    /api/verify/<cód>     verifica un recibo, pública
+ *
+ * Copias de seguridad:
  *
  * La app sube su base de datos completa (el mismo JSON de "Exportar copia")
  * y este Worker la guarda en KV:
@@ -89,8 +97,160 @@ async function authorize(request: Request, env: Env, allowClaim: boolean): Promi
   return safeEqual(hash, stored) ? { ok: true } : { ok: false, response: json({ error: 'wrong_key' }, 403) };
 }
 
+// === Tasa de cambio ===
+
+interface RateResponse {
+  rate: number;
+  date?: string;
+  source: string;
+}
+
+const RATE_TTL = 6 * 60 * 60;
+
+async function fetchJson(url: string): Promise<unknown> {
+  const res = await fetch(url, { headers: { accept: 'application/json' } });
+  if (!res.ok) throw new Error(`http_${res.status}`);
+  return res.json();
+}
+
+/** TRM vigente hoy según la Superintendencia Financiera (datos.gov.co); si falla, un servicio público. */
+async function currentRate(env: Env): Promise<RateResponse> {
+  const today = colombiaDate();
+  const cacheKey = `rate:${today}`;
+  const cached = await env.BACKUPS.get(cacheKey, 'text');
+  if (cached) return JSON.parse(cached) as RateResponse;
+
+  let result: RateResponse | null = null;
+  try {
+    const where = encodeURIComponent(`vigenciadesde <= '${today}T00:00:00'`);
+    const rows = (await fetchJson(
+      `https://www.datos.gov.co/resource/32sa-8pi3.json?$where=${where}&$order=vigenciadesde%20DESC&$limit=1`,
+    )) as { valor?: string; vigenciadesde?: string }[];
+    const rate = Number(rows?.[0]?.valor);
+    if (rate > 0) result = { rate, date: rows[0].vigenciadesde?.slice(0, 10), source: 'trm' };
+  } catch {
+    // se intenta el respaldo
+  }
+  if (!result) {
+    const body = (await fetchJson('https://open.er-api.com/v6/latest/USD')) as { rates?: Record<string, number> };
+    const rate = Number(body?.rates?.COP);
+    if (!(rate > 0)) throw new Error('rate_unavailable');
+    result = { rate: Math.round(rate * 100) / 100, date: today, source: 'open.er-api.com' };
+  }
+  await env.BACKUPS.put(cacheKey, JSON.stringify(result), { expirationTtl: RATE_TTL });
+  return result;
+}
+
+// === Recibos verificables ===
+
+interface PublicReceipt {
+  code: string;
+  receiptNumber: string;
+  date: string;
+  store: string;
+  total: number;
+  shippingFee?: number;
+  items: { name: string; quantity: number; subtotal: number }[];
+  status?: 'valid' | 'void';
+}
+
+const CODE_RE = /^[2-9A-HJ-NP-Z]{8,16}$/;
+const MAX_RECEIPT = 32 * 1024;
+
+function cleanReceipt(raw: unknown): PublicReceipt | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.code !== 'string' || !CODE_RE.test(r.code)) return null;
+  if (!Array.isArray(r.items)) return null;
+  const text = (v: unknown, max: number) => String(v ?? '').slice(0, max);
+  const num = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  return {
+    code: r.code,
+    receiptNumber: text(r.receiptNumber, 40),
+    date: text(r.date, 40),
+    store: text(r.store, 80),
+    total: num(r.total),
+    shippingFee: r.shippingFee ? num(r.shippingFee) : undefined,
+    items: r.items.slice(0, 200).map((i) => {
+      const it = (i ?? {}) as Record<string, unknown>;
+      return { name: text(it.name, 120), quantity: num(it.quantity), subtotal: num(it.subtotal) };
+    }),
+    status: r.status === 'void' ? 'void' : 'valid',
+  };
+}
+
+/** Busca el recibo en la última copia de seguridad (por si no se registró al vender). */
+async function receiptFromBackup(env: Env, code: string): Promise<PublicReceipt | null> {
+  const raw = await env.BACKUPS.get('backup:latest', 'text');
+  if (!raw) return null;
+  // Evita leer toda la copia si el código ni aparece.
+  if (!raw.includes(code)) return null;
+  type Tx = { id?: number; verifyCode?: string; receiptNumber?: string; date?: string; total?: number; shippingFee?: number; status?: string };
+  type Item = { transactionId?: number; productName?: string; quantity?: number; subtotal?: number };
+  const data = JSON.parse(raw) as { transactions?: Tx[]; transactionItems?: Item[]; storeSettings?: { storeName?: string }[] };
+  const tx = data.transactions?.find((t) => t.verifyCode === code && t.status === 'completed');
+  if (!tx) return null;
+  const items = (data.transactionItems || []).filter((i) => i.transactionId === tx.id);
+  return cleanReceipt({
+    code,
+    receiptNumber: tx.receiptNumber,
+    date: tx.date,
+    store: data.storeSettings?.[0]?.storeName || 'SD Tech Imports',
+    total: tx.total,
+    shippingFee: tx.shippingFee,
+    items: items.map((i) => ({ name: i.productName, quantity: i.quantity, subtotal: i.subtotal })),
+  });
+}
+
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   if (!env.BACKUPS) return json({ error: 'storage_unavailable' }, 503);
+
+  if (url.pathname === '/api/rate' && request.method === 'GET') {
+    try {
+      return json(await currentRate(env));
+    } catch {
+      return json({ error: 'rate_unavailable' }, 502);
+    }
+  }
+
+  const verifyMatch = url.pathname.match(/^\/api\/verify\/([^/]+)$/);
+  if (verifyMatch && request.method === 'GET') {
+    const code = decodeURIComponent(verifyMatch[1]).toUpperCase();
+    if (!CODE_RE.test(code)) return json({ error: 'not_found' }, 404);
+    const stored = await env.BACKUPS.get(`receipt:${code}`, 'text');
+    const receipt = stored ? (JSON.parse(stored) as PublicReceipt) : await receiptFromBackup(env, code);
+    if (!receipt) return json({ error: 'not_found' }, 404);
+    return json({ receipt });
+  }
+
+  if (url.pathname === '/api/receipts' && request.method === 'POST') {
+    const auth = await authorize(request, env, false);
+    if (!auth.ok) return auth.response;
+    const body = await request.text();
+    if (body.length > MAX_RECEIPT) return json({ error: 'too_large' }, 413);
+    let receipt: PublicReceipt | null = null;
+    try {
+      receipt = cleanReceipt(JSON.parse(body));
+    } catch {
+      receipt = null;
+    }
+    if (!receipt) return json({ error: 'invalid_receipt' }, 400);
+    await env.BACKUPS.put(`receipt:${receipt.code}`, JSON.stringify({ ...receipt, status: 'valid' }));
+    return json({ ok: true });
+  }
+
+  const receiptMatch = url.pathname.match(/^\/api\/receipts\/([^/]+)$/);
+  if (receiptMatch && request.method === 'DELETE') {
+    const auth = await authorize(request, env, false);
+    if (!auth.ok) return auth.response;
+    const code = decodeURIComponent(receiptMatch[1]).toUpperCase();
+    if (!CODE_RE.test(code)) return json({ error: 'bad_code' }, 400);
+    const stored = await env.BACKUPS.get(`receipt:${code}`, 'text');
+    const receipt = stored ? (JSON.parse(stored) as PublicReceipt) : await receiptFromBackup(env, code);
+    if (!receipt) return json({ error: 'not_found' }, 404);
+    await env.BACKUPS.put(`receipt:${code}`, JSON.stringify({ ...receipt, status: 'void' }));
+    return json({ ok: true });
+  }
 
   // GET /api/status — ¿ya hay una clave registrada? (no requiere clave)
   if (url.pathname === '/api/status' && request.method === 'GET') {

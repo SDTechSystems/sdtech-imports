@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "EasyDrink",
+    "name": "SD Tech Imports",
     "tagline": "POS gratis — Gestiona tus ventas con facilidad 🇨🇴"
   },
   "nav": {
@@ -65,80 +65,21 @@
     "storageUsed": "Almacenamiento usado"
   },
   "whatsNew": {
-    "title": "Novedades de EasyDrink",
+    "title": "Novedades de SD Tech Imports",
     "slide": "Diapositiva {{number}}",
     "finish": "Listo",
     "skip": "Omitir"
   },
   "whatsNewFeatures": {
-    "2026-06-kitchen-ticket": {
-      "title": "Imprimir comanda de cocina",
-      "description": "Ahora puedes imprimir comandas de cocina (pedidos sin precios ni totales) al guardar una cuenta o desde la lista de cuentas abiertas. Incluyen casillas vacías a la derecha de cada ítem para que el personal de cocina las marque a mano.",
-      "ctaLabel": "Abrir caja"
+    "2026-11-imports": {
+      "title": "Compras en dólares y pedidos en camino",
+      "description": "Registra tus compras de Amazon en dólares: la app las pasa a pesos con el dólar del día (o la tasa a la que compraste en Morse) y les suma el envío. Lo que sigue en tránsito aparece en el inicio hasta que lo marques como recibido.",
+      "ctaLabel": "Registrar compra"
     },
-    "2026-06-cashier-layout": {
-      "title": "Vista de caja en cuadrícula / filas",
-      "description": "Ahora puedes elegir la vista de productos en la caja entre Cuadrícula (tarjetas grandes) o Filas (lista compacta). Ideal si tienes muchos productos y prefieres una vista más simple. Ajústalo en Ajustes → Vista de caja.",
-      "ctaLabel": "Abrir ajustes"
-    },
-    "2026-06-import-excel": {
-      "title": "Importar productos desde Excel",
-      "description": "Ahora puedes agregar productos nuevos en lote con un archivo de Excel (.xlsx) y un flujo de validación. Descarga la plantilla estándar con referencias de categorías y unidades, sube el archivo, revisa el estado de los datos (válido o con error) en la vista previa y guarda todos los productos válidos de una vez.",
-      "ctaLabel": "Gestionar productos"
-    },
-    "2026-06-stock-opname": {
-      "title": "Conteo de inventario (ajuste de stock)",
-      "description": "Ahora puedes hacer conteos físicos periódicos del inventario. El sistema permite cuadrar el stock físico manualmente o en lote descargando y subiendo hojas de Excel. Las diferencias se ajustan automáticamente y quedan registradas en los movimientos del reporte de stock.",
-      "ctaLabel": "Iniciar conteo"
-    },
-    "2026-06-receipt-footer": {
-      "title": "Pie de recibo personalizado",
-      "description": "Ahora puedes cambiar el texto al final de los recibos para adaptarlo a tu tienda. Accede a esta opción desde el nuevo menú \"Pie de recibo\" en Ajustes. Los cambios se ven en tiempo real en la vista previa del recibo.",
-      "ctaLabel": "Configurar pie de recibo"
-    },
-    "2026-06-customer-debts": {
-      "title": "Pagos de deudas de clientes",
-      "description": "Ahora la caja puede aceptar pagos parciales o totales como deuda para clientes seleccionados. Registra abonos poco a poco, controla los saldos pendientes y consulta el historial completo de pagos desde el nuevo menú Lista de deudas.",
-      "ctaLabel": "Abrir lista de deudas"
-    },
-    "2026-06-print-daily-closing": {
-      "title": "Imprimir cierre diario",
-      "description": "Ahora puedes ver, descargar, compartir e imprimir el reporte de cierre diario de ventas directamente en una impresora térmica Bluetooth. La página de Reportes ahora abre por defecto en la pestaña Diario, con un aviso si no hay transacciones en el día.",
-      "ctaLabel": "Abrir reportes"
-    },
-    "2026-06-rebrand-freekasir": {
-      "title": "Nueva imagen: EasyDrink",
-      "description": "Esta aplicación ahora se llama EasyDrink y tiene una imagen y colores nuevos. Tus funciones y datos siguen igual. ¿Prefieres otros colores? Puedes elegir tu tema favorito en Ajustes → Color del tema.",
-      "ctaLabel": "Cambiar color del tema"
-    },
-    "2026-06-stock-search-scan": {
-      "title": "Buscar y escanear en entradas/salidas de stock",
-      "description": "Registrar stock ahora es más rápido. En las páginas de Entrada y Salida de stock, busca productos por nombre, SKU o código de barras, con opción de escanear con la cámara. Los campos de cantidad y precio de compra ahora usan separador de miles (p. ej., 10.000) para leerlos mejor.",
-      "ctaLabel": "Abrir entrada de stock"
-    },
-    "2026-06-export-excel": {
-      "title": "Exportar reportes a Excel",
-      "description": "Ahora puedes exportar reportes a archivos de Excel (.xlsx) desde la página de Reportes. Haz clic en Exportar, elige un rango de fechas y descarga un archivo con el resumen de pérdidas y ganancias, la lista de transacciones, el detalle de ítems y los gastos.",
-      "ctaLabel": "Abrir reportes"
-    },
-    "2026-05-customers": {
-      "title": "Datos de clientes",
-      "description": "Gestiona los datos de tus clientes y vincúlalos a las transacciones. Busca, selecciona o crea clientes nuevos directamente al cobrar (opcional). Consulta el detalle de cada cliente para ver su historial completo de transacciones.",
-      "ctaLabel": "Gestionar clientes"
-    },
-    "2026-05-unmanaged-stock": {
-      "title": "Productos sin control de stock",
-      "description": "Ahora puedes vender productos sin controlar el stock, ideal para servicios o comida preparada al momento. Actívalo con el interruptor \"Controlar stock\" al agregar o editar productos. Estos productos siempre estarán disponibles al cobrar.",
-      "ctaLabel": "Gestionar productos"
-    },
-    "2026-05-expense-tracking": {
-      "title": "Control de gastos",
-      "description": "Registra gastos operativos (luz, salarios, arriendo, etc.) y ve la utilidad neta real en tus reportes. El flujo de caja de tu tienda ahora está completo en una sola app.",
-      "ctaLabel": "Probar ahora"
-    },
-    "2026-05-error-boundary": {
-      "title": "Mensajes de error más claros",
-      "description": "Si la app tiene un error inesperado, ahora aparecerá un mensaje detallado que puedes copiar y reportar al desarrollador. Se acabaron las pantallas en blanco sin información."
+    "2026-11-receipt-qr": {
+      "title": "Recibos con QR verificable",
+      "description": "Cada recibo lleva un QR. Quien lo escanee ve si el recibo es auténtico y fue emitido por tu tienda.",
+      "ctaLabel": "Ajustes del recibo"
     }
   },
   "error": {
@@ -160,7 +101,7 @@
     "description": "¡Empieza a construir tu increíble proyecto aquí!"
   },
   "themeColors": {
-    "easydrink": "EasyDrink",
+    "brand": "SD Tech Imports",
     "blue": "Azul",
     "orange": "Naranja",
     "green": "Verde",
@@ -187,7 +128,7 @@
     "change": "Cambio",
     "thanks": "¡Gracias!",
     "watermarkLine1": "Impreso desde la app",
-    "watermarkLine2": "EasyDrink",
+    "watermarkLine2": "SD Tech Imports",
     "kitchenTicket": "COMANDA",
     "dailyTitle": "REPORTE DIARIO DE VENTAS",
     "period": "Periodo",
@@ -219,7 +160,9 @@
       "listFailed": "No se pudo obtener la lista de impresoras: {{error}}",
       "bluetoothOff": "Bluetooth no está activado",
       "bluetoothOffHint": "Bluetooth no está activado. Actívalo e inténtalo de nuevo."
-    }
+    },
+    "shipping": "Envio",
+    "verify": "Escanea para verificar este recibo"
   },
   "permissions": {
     "create_transaction": {
@@ -291,8 +234,8 @@
     "noData": "La copia de seguridad no contiene datos",
     "rollbackFailed": "La importación falló y no se pudieron restaurar los datos anteriores. Intenta restaurar desde una copia de seguridad.",
     "importFailed": "La importación falló; se restauraron los datos anteriores",
-    "shareTitle": "Copia de seguridad EasyDrink",
-    "shareText": "Copia de seguridad de los datos de EasyDrink (JSON)",
+    "shareTitle": "Copia de seguridad SD Tech Imports",
+    "shareText": "Copia de seguridad de los datos de SD Tech Imports (JSON)",
     "dialogTitle": "Guardar / compartir copia de seguridad",
     "success": "¡Copia de seguridad creada!",
     "failed": "No se pudo crear o compartir la copia de seguridad",

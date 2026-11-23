@@ -41,7 +41,23 @@ interface PrintData {
   paymentMethodName: string;
   cashierName?: string;
   language?: string;
+  verifyUrl?: string; // si existe, se imprime un QR para verificar el recibo
 }
+
+/** Comandos ESC/POS (GS ( k) para imprimir un QR. Solo texto ASCII corto. */
+export const escposQr = (data: string): string => {
+  const ascii = data.replace(/[^\x20-\x7E]/g, '').slice(0, 120);
+  const len = ascii.length + 3;
+  const pL = String.fromCharCode(len % 256);
+  const pH = String.fromCharCode(Math.floor(len / 256));
+  return [
+    '\x1D\x28\x6B\x04\x00\x31\x41\x32\x00', // modelo 2
+    '\x1D\x28\x6B\x03\x00\x31\x43\x06', // tamaño del módulo
+    '\x1D\x28\x6B\x03\x00\x31\x45\x31', // corrección de errores M
+    `\x1D\x28\x6B${pL}${pH}\x31\x50\x30${ascii}`, // datos
+    '\x1D\x28\x6B\x03\x00\x31\x51\x30', // imprimir
+  ].join('');
+};
 
 const DEFAULT_PRINTER_KEY = 'kg_default_bluetooth_printer';
 
@@ -97,6 +113,7 @@ export const getESCPOSData = ({
   paymentMethodName,
   cashierName,
   language,
+  verifyUrl,
 }: PrintData): string => {
   const lines: string[] = [];
   const t = printLabels(language);
@@ -132,6 +149,9 @@ export const getESCPOSData = ({
   if (transaction.discountAmount > 0) {
     lines.push(formatRow(`${t('discount')}:`, `-${rp(transaction.discountAmount)}`));
   }
+  if (transaction.shippingFee && transaction.shippingFee > 0) {
+    lines.push(formatRow(`${t('shipping')}:`, rp(transaction.shippingFee)));
+  }
   lines.push(formatRow(`${t('total')}:`, rp(transaction.total)));
   lines.push(formatRow(`${t('paid')}:`, rp(transaction.paymentAmount)));
   if (transaction.debtAmount && transaction.debtAmount > 0) {
@@ -142,6 +162,11 @@ export const getESCPOSData = ({
   lines.push('--------------------------------\n');
   lines.push('\x1B\x61\x01'); // Center
   lines.push(`${storeSettings?.receiptFooter || t('thanks')}\n`);
+  if (verifyUrl && transaction.verifyCode) {
+    lines.push(`\n${t('verify')}\n`);
+    lines.push(escposQr(verifyUrl));
+    lines.push(`\n${transaction.verifyCode}\n`);
+  }
   
   const hideWatermark = !!storeSettings?.hideWatermark;
   if (!hideWatermark) {

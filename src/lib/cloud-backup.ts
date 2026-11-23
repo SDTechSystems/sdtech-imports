@@ -9,7 +9,7 @@ import { buildBackupData, restoreFromBackupData } from '@/lib/backup';
  * no cambie los datos (y no provoque otra subida).
  */
 
-const STORAGE_KEY = 'easydrink.cloudBackup';
+const STORAGE_KEY = 'sdtech.cloudBackup';
 const AUTO_INTERVAL_MS = 3 * 60 * 1000;
 
 export interface CloudBackupMeta {
@@ -80,6 +80,11 @@ export function getCloudStatus(): CloudBackupStatus {
     lastUploadAt: s?.lastUploadAt,
     lastError: s?.lastError,
   };
+}
+
+/** Clave de la nube guardada en este dispositivo (o null si no está conectado). */
+export function getCloudKey(): string | null {
+  return readState()?.key || null;
 }
 
 function notify() {

@@ -18,15 +18,15 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "easydrink-icon.png"],
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "sdtech-icon.png"],
       manifest: {
-        name: "EasyDrink",
-        short_name: "EasyDrink",
-        description: "Ventas, inventario, clientes y deudas de EasyDrink.",
+        name: "SD Tech Imports",
+        short_name: "SD Tech Imports",
+        description: "Ventas, inventario, clientes y deudas de SD Tech Imports.",
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
-        theme_color: "#451EB8",
+        theme_color: "#001B44",
         orientation: "any",
         icons: [
           {
@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
             purpose: "any"
           },
           {
-            src: "/easydrink-icon.png",
+            src: "/sdtech-icon.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",

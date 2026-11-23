@@ -45,9 +45,9 @@ export async function buildBackupData() {
   };
 }
 
-/** Nombre estándar del archivo de copia, p. ej. easydrink-backup-2026-06-11.json */
+/** Nombre estándar del archivo de copia, p. ej. sdtech-imports-backup-2026-06-11.json */
 export function backupFileName(date = new Date()): string {
-  return `easydrink-backup-${date.toISOString().slice(0, 10)}.json`;
+  return `sdtech-imports-backup-${date.toISOString().slice(0, 10)}.json`;
 }
 
 /** Bangun JSON string siap simpan/upload. */

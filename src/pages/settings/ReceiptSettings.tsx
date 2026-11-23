@@ -6,6 +6,7 @@ import { Receipt, ChevronLeft, Save } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getVerifyBaseUrl } from '@/lib/receipt-verify';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Link } from 'react-router-dom';
@@ -20,6 +21,7 @@ export default function ReceiptSettings() {
   const [footerText, setFooterText] = useState('');
   const [printLogo, setPrintLogo] = useState(false);
   const [hideWatermark, setHideWatermark] = useState(false);
+  const [verifyBaseUrl, setVerifyBaseUrl] = useState('');
 
   // Sync state with db loaded value
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function ReceiptSettings() {
       setFooterText(storeSettings.receiptFooter ?? '');
       setPrintLogo(storeSettings.printLogo ?? false);
       setHideWatermark(storeSettings.hideWatermark ?? false);
+      setVerifyBaseUrl(storeSettings.verifyBaseUrl ?? '');
     }
   }, [storeSettings]);
 
@@ -41,6 +44,7 @@ export default function ReceiptSettings() {
         receiptFooter: footerText.trim(),
         printLogo,
         hideWatermark,
+        verifyBaseUrl: verifyBaseUrl.trim().replace(/\/+$/, '') || undefined,
       });
       toast.success(t('receiptSettings.saveSuccess'));
     } catch {
@@ -118,6 +122,25 @@ export default function ReceiptSettings() {
             />
             <p className="text-[10px] text-muted-foreground">
               {t('masterData.receiptFooter.description')}
+            </p>
+          </div>
+
+          {/* Dirección pública para el QR de verificación */}
+          <div className="space-y-1.5">
+            <Label htmlFor="verify-url-input" className="text-sm font-semibold">
+              {t('receiptSettings.verifyUrlLabel')}
+            </Label>
+            <Input
+              id="verify-url-input"
+              value={verifyBaseUrl}
+              onChange={(e) => setVerifyBaseUrl(e.target.value)}
+              placeholder={getVerifyBaseUrl() || 'https://sdtech-imports.tu-cuenta.workers.dev'}
+              className="h-11"
+              type="url"
+              inputMode="url"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              {t('receiptSettings.verifyUrlDesc')}
             </p>
           </div>
 
