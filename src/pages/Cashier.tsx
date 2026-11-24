@@ -113,6 +113,7 @@ export default function Kasir() {
   const [cancelTargetTx, setCancelTargetTx] = useState<Transaction | null>(null);
   const [scanInput, setScanInput] = useState('');
   const scanInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
 
   // Cashier layout mode settings (default: 'grid')
@@ -674,12 +675,12 @@ export default function Kasir() {
     }
   };
 
-  // Auto-focus scan input after it clears
+  // Open the cashier with the cursor in the product name search. The barcode
+  // field keeps the cursor after a scan, so scanning several items in a row
+  // still works once it has been tapped.
   useEffect(() => {
-    if (scanInput === '' && scanInputRef.current) {
-      scanInputRef.current.focus();
-    }
-  }, [scanInput]);
+    searchInputRef.current?.focus();
+  }, []);
 
   // Save the cart in progress so it is still there after changing pages.
   useEffect(() => {
@@ -762,7 +763,7 @@ export default function Kasir() {
       <div className="flex gap-2 mb-3 px-1">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder={t('cashier.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-10" />
+          <Input ref={searchInputRef} placeholder={t('cashier.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-10" />
         </div>
         <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setScannerOpen(true)}>
           <ScanBarcode className="w-5 h-5" />
