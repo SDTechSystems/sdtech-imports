@@ -393,7 +393,7 @@ export default function Produk() {
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setImportDialogOpen(true)} className="h-9 gap-1.5" aria-label={t('excel.importButton')} title={t('excel.importButton')}>
               <Upload className="w-4 h-4" />
-              <span className="hidden min-[400px]:inline">{t('excel.importButton')}</span>
+              <span>{t('excel.importButton')}</span>
             </Button>
             <Button size="sm" onClick={openAdd} className="h-9 gap-1.5">
               <Plus className="w-4 h-4" />
