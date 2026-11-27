@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import ProductThumb from '@/components/ProductThumb';
 import { db, isStockManaged, pendingDelivery, type Product, type Category } from '@/lib/db';
 import { useState, useRef } from 'react';
-import { Plus, Search, Edit2, Trash2, Package as PackageIcon, Camera, X, Copy, Infinity as InfinityIcon, ScanLine, Upload, Download, AlertTriangle, CheckCircle2, XCircle, Loader2, FileSpreadsheet, Home as HomeIcon } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package as PackageIcon, Camera, X, Copy, Infinity as InfinityIcon, ScanLine, Upload, Download, AlertTriangle, CheckCircle2, XCircle, Loader2, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 
 type ParsedRow = ProductImportRow;
 
-import HomeStockDialog from '@/components/HomeStockDialog';
+import InventoryCsvDialog from '@/components/InventoryCsvDialog';
 import { inTransitByProduct } from '@/lib/imports';
 import { Plane } from 'lucide-react';
 
@@ -43,7 +43,7 @@ export default function Produk() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
-  const [homeStockProduct, setHomeStockProduct] = useState<Product | null>(null);
+  const [inventoryCsvOpen, setInventoryCsvOpen] = useState(false);
   // Field tujuan hasil scan kamera: SKU atau Barcode.
   const [scanTarget, setScanTarget] = useState<'sku' | 'barcode' | null>(null);
 
@@ -162,8 +162,7 @@ export default function Produk() {
     };
 
     if (editProduct?.id) {
-      const home = editProduct.stockHome ?? 0;
-      await db.products.update(editProduct.id, home > data.stock ? { ...data, stockHome: Math.max(0, data.stock) } : data);
+      await db.products.update(editProduct.id, data);
     } else {
       await db.products.add({
         ...data,
@@ -389,8 +388,13 @@ export default function Produk() {
           <PackageIcon className="w-5 h-5 text-primary shrink-0" />
           {t('title')}
         </h1>
-        {canManage && (
+        {(canManage || can('manage_stock_inout')) && (
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setInventoryCsvOpen(true)} className="h-9 gap-1.5" aria-label={t('inventoryCsv.button')} title={t('inventoryCsv.button')}>
+              <FileSpreadsheet className="w-4 h-4" />
+              <span className="hidden min-[480px]:inline">{t('inventoryCsv.button')}</span>
+            </Button>
+            {canManage && (<>
             <Button size="sm" variant="outline" onClick={() => setImportDialogOpen(true)} className="h-9 gap-1.5" aria-label={t('excel.importButton')} title={t('excel.importButton')}>
               <Upload className="w-4 h-4" />
               <span className="hidden min-[400px]:inline">{t('excel.importButton')}</span>
@@ -399,6 +403,7 @@ export default function Produk() {
               <Plus className="w-4 h-4" />
               {t('addButton')}
             </Button>
+            </>)}
           </div>
         )}
       </div>
@@ -489,11 +494,6 @@ export default function Produk() {
                           {t('card.inTransit', { qty: inTransit?.get(p.id!) })}
                         </span>
                       ) : null}
-                      {isStockManaged(p) && (p.stockHome ?? 0) > 0 ? (
-                        <span className="text-[10px] text-muted-foreground">
-                          {t('homeStock.split', { office: p.stock - Math.min(p.stockHome ?? 0, p.stock), home: Math.min(p.stockHome ?? 0, p.stock) })}
-                        </span>
-                      ) : null}
                       {isStockManaged(p) ? null : (
                         <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-primary/10 text-primary flex items-center gap-1">
                           <InfinityIcon className="w-3 h-3" />
@@ -508,11 +508,6 @@ export default function Produk() {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
-                        {isStockManaged(p) && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title={t('homeStock.button')} onClick={() => setHomeStockProduct(p)}>
-                            <HomeIcon className="w-3.5 h-3.5" />
-                          </Button>
-                        )}
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(p.id!)}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
@@ -526,7 +521,7 @@ export default function Produk() {
         </div>
       )}
 
-      <HomeStockDialog product={homeStockProduct} onClose={() => setHomeStockProduct(null)} />
+      <InventoryCsvDialog open={inventoryCsvOpen} onOpenChange={setInventoryCsvOpen} />
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

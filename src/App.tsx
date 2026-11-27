@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Cashier from "./pages/Cashier";
 import Products from "./pages/Products";
 import Reports from "./pages/Reports";
+import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import SupplierPage from "./pages/Supplier";
 import CustomersPage from "./pages/Customers";
@@ -89,6 +90,14 @@ const App = () => {
                     element={
                       <ErrorBoundary>
                         <Reports />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/reports/analytics"
+                    element={
+                      <ErrorBoundary>
+                        <Analytics />
                       </ErrorBoundary>
                     }
                   />

@@ -474,8 +474,6 @@
       "notesPlaceholder": "Opcional",
       "total": "Total: $ {{amount}}",
       "save": "Guardar compra",
-      "toHomeLabel": "Guardar en casa",
-      "toHomeDesc": "Estas unidades quedan en el inventario de casa",
       "supplierLabelOptional": "Proveedor"
     },
     "toast": {
@@ -551,7 +549,8 @@
       "markOrderReceived": "Llegó todo el pedido",
       "markSomeReceived_one": "Marcar {{count}} producto como recibido",
       "markSomeReceived_other": "Marcar {{count}} productos como recibidos"
-    }
+    },
+    "csv": "CSV"
   },
   "stockOut": {
     "locked": {
@@ -885,8 +884,6 @@
       "remainingDebtHint": "Debes seleccionar el cliente de la lista",
       "changeLabel": "Cambio",
       "confirmButton": "Confirmar transacción",
-      "fromHomeLabel": "Sale del inventario de casa",
-      "fromHomeDesc": "Descuenta estas unidades de lo que tienes en casa",
       "shippingLabel": "Envío al cliente (opcional)",
       "shippingHint": "Escríbelo según la distancia. Se suma al total pero no cuenta como ganancia."
     },

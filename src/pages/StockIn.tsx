@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, isStockManaged, type ImportOrigin } from '@/lib/db';
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, Plus, ChevronLeft, Plane, PackageCheck, RefreshCw, Trash2 } from 'lucide-react';
+import { ArrowDownToLine, Plus, ChevronLeft, Plane, PackageCheck, RefreshCw, Trash2, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -17,6 +17,7 @@ import ProductPicker from '@/components/ProductPicker';
 import SearchableSelect from '@/components/SearchableSelect';
 import NumberInput from '@/components/NumberInput';
 import ReceiveImportDialog from '@/components/ReceiveImportDialog';
+import InventoryCsvDialog from '@/components/InventoryCsvDialog';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/currency';
 import { getDateLocale } from '@/i18n';
@@ -63,12 +64,12 @@ export default function StockInPage() {
   const [inTransit, setInTransit] = useState(true);
   const [tracking, setTracking] = useState('');
   const [notes, setNotes] = useState('');
-  const [toHome, setToHome] = useState(false);
   const [filterSupplier, setFilterSupplier] = useState('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
     searchParams.get('estado') === 'transito' ? 'in_transit' : 'all',
   );
   const [openId, setOpenId] = useState<number | null>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
 
   const stockIns = useLiveQuery(() => db.stockIns.orderBy('date').reverse().toArray());
   const products = useLiveQuery(() => db.products.where('isDeleted').equals(0).toArray());
@@ -113,7 +114,7 @@ export default function StockInPage() {
 
   const openAdd = async () => {
     setLines([emptyLine()]); setSupplierId(''); setShipping('');
-    setNotes(''); setTracking(''); setToHome(false); setCurrency('USD'); setOrigin('US'); setInTransit(true);
+    setNotes(''); setTracking(''); setCurrency('USD'); setOrigin('US'); setInTransit(true);
     setRate(storeSettings?.lastExchangeRate ? String(storeSettings.lastExchangeRate) : '');
     setDialogOpen(true);
     // Se propone la tasa del día; si no hay conexión queda la última que usaste.
@@ -163,7 +164,6 @@ export default function StockInPage() {
         shippingCost: cost.shippingCop || undefined,
         tracking: tracking.trim() || undefined,
         orderId,
-        toHome,
         receivedAt: null,
       }) as number);
     }
@@ -201,10 +201,17 @@ export default function StockInPage() {
             {t('stockIn.title')}
           </h1>
         </div>
-        <Button size="sm" onClick={openAdd} className="h-9 gap-1.5">
-          <Plus className="w-4 h-4" /> {t('stockIn.add')}
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)} className="h-9 gap-1.5" aria-label={t('stockIn.csv')} title={t('stockIn.csv')}>
+            <FileSpreadsheet className="w-4 h-4" /> <span className="hidden min-[400px]:inline">{t('stockIn.csv')}</span>
+          </Button>
+          <Button size="sm" onClick={openAdd} className="h-9 gap-1.5">
+            <Plus className="w-4 h-4" /> {t('stockIn.add')}
+          </Button>
+        </div>
       </div>
+
+      <InventoryCsvDialog open={csvOpen} onOpenChange={setCsvOpen} defaultMode="entry" />
 
       <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
         {(['all', 'in_transit', 'received'] as StatusFilter[]).map(f => (
@@ -473,13 +480,6 @@ export default function StockInPage() {
               <Switch checked={inTransit} onCheckedChange={setInTransit} />
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-              <div>
-                <p className="text-sm font-semibold">{t('stockIn.dialog.toHomeLabel')}</p>
-                <p className="text-[10px] text-muted-foreground">{t('stockIn.dialog.toHomeDesc')}</p>
-              </div>
-              <Switch checked={toHome} onCheckedChange={setToHome} />
-            </div>
             <div className="space-y-1.5"><Label>{t('stockIn.dialog.notesLabel')}</Label><Input value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('stockIn.dialog.notesPlaceholder')} className="h-11" /></div>
             <Button className="w-full h-12 text-base font-semibold" onClick={handleSave}>{t('stockIn.dialog.save')}</Button>
           </div>

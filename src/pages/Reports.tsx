@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { useEffect, useState } from 'react';
-import { BarChart3, TrendingUp, ShoppingCart, Package, DollarSign, ArrowDown, ArrowUp, Minus, Wallet, CreditCard, Download, Printer } from 'lucide-react';
+import { BarChart3, TrendingUp, ShoppingCart, Package, DollarSign, ArrowDown, ArrowUp, Minus, Wallet, CreditCard, Download, Printer, ChevronRight, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
@@ -17,6 +17,7 @@ import { printRawNativeBluetooth, getDailyReportESCPOSData, type DailyReportPrin
 import DailyReportReceipt from '@/components/reports/DailyReportReceipt';
 import { useTranslation } from 'react-i18next';
 import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
+import { Link } from 'react-router-dom';
 
 
 export default function Laporan() {
@@ -220,6 +221,21 @@ export default function Laporan() {
           data={reportData}
         />
       )}
+
+      <Link to="/reports/analytics" className="block">
+        <Card className="border-0 shadow-sm bg-primary/5 hover:bg-primary/10 transition-colors">
+          <CardContent className="p-3 flex items-center gap-3">
+            <span className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Filter className="w-4 h-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{t('analyticsLink.title')}</p>
+              <p className="text-[11px] text-muted-foreground">{t('analyticsLink.desc')}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+          </CardContent>
+        </Card>
+      </Link>
 
       <Tabs value={period} onValueChange={v => setPeriod(v as 'daily' | '7' | '30')}>
         <TabsList className="w-full">

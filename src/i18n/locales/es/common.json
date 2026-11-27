@@ -71,6 +71,16 @@
     "skip": "Omitir"
   },
   "whatsNewFeatures": {
+    "2026-11-sales-analytics": {
+      "title": "Análisis de ventas con filtros",
+      "description": "En Reportes → Análisis detallado puedes ver compras por cliente, ventas en las fechas que elijas, productos, días y horas fuertes. Filtra por cliente, producto, categoría, método de pago o cajero y exporta a CSV.",
+      "ctaLabel": "Ver análisis"
+    },
+    "2026-11-inventory-csv": {
+      "title": "Inventario por CSV",
+      "description": "En Productos → Inventario CSV descarga tu inventario actual o un formulario para llenarlo. Súbelo para sumar una entrada de mercancía o corregir el conteo.",
+      "ctaLabel": "Ir a productos"
+    },
     "2026-11-order-tracking": {
       "title": "Seguimiento de pedidos",
       "description": "Tus clientes que pagaron por adelantado ya pueden ver dónde va su pedido: tránsito, aduanas, ciudad. Tú actualizas el estado y les envías el enlace por WhatsApp.",
