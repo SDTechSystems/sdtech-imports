@@ -28,6 +28,7 @@ import { CURRENCY_SYMBOL, NUMBER_LOCALE } from '@/lib/currency';
 type ParsedRow = ProductImportRow;
 
 import HomeStockDialog from '@/components/HomeStockDialog';
+import InventoryCsvDialog from '@/components/InventoryCsvDialog';
 import { inTransitByProduct } from '@/lib/imports';
 import { Plane } from 'lucide-react';
 
@@ -44,6 +45,7 @@ export default function Produk() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [homeStockProduct, setHomeStockProduct] = useState<Product | null>(null);
+  const [inventoryCsvOpen, setInventoryCsvOpen] = useState(false);
   // Field tujuan hasil scan kamera: SKU atau Barcode.
   const [scanTarget, setScanTarget] = useState<'sku' | 'barcode' | null>(null);
 
@@ -389,8 +391,13 @@ export default function Produk() {
           <PackageIcon className="w-5 h-5 text-primary shrink-0" />
           {t('title')}
         </h1>
-        {canManage && (
+        {(canManage || can('manage_stock_inout')) && (
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setInventoryCsvOpen(true)} className="h-9 gap-1.5" aria-label={t('inventoryCsv.button')} title={t('inventoryCsv.button')}>
+              <FileSpreadsheet className="w-4 h-4" />
+              <span className="hidden min-[480px]:inline">{t('inventoryCsv.button')}</span>
+            </Button>
+            {canManage && (<>
             <Button size="sm" variant="outline" onClick={() => setImportDialogOpen(true)} className="h-9 gap-1.5" aria-label={t('excel.importButton')} title={t('excel.importButton')}>
               <Upload className="w-4 h-4" />
               <span className="hidden min-[400px]:inline">{t('excel.importButton')}</span>
@@ -399,6 +406,7 @@ export default function Produk() {
               <Plus className="w-4 h-4" />
               {t('addButton')}
             </Button>
+            </>)}
           </div>
         )}
       </div>
@@ -527,6 +535,7 @@ export default function Produk() {
       )}
 
       <HomeStockDialog product={homeStockProduct} onClose={() => setHomeStockProduct(null)} />
+      <InventoryCsvDialog open={inventoryCsvOpen} onOpenChange={setInventoryCsvOpen} />
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

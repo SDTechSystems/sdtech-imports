@@ -71,6 +71,16 @@
     "skip": "Skip"
   },
   "whatsNewFeatures": {
+    "2026-11-sales-analytics": {
+      "title": "Sales analysis with filters",
+      "description": "In Reports → Detailed analysis you can see purchases by customer, sales on the dates you choose, products and the strongest days and hours. Filter by customer, product, category, payment method or cashier and export to CSV.",
+      "ctaLabel": "Open analysis"
+    },
+    "2026-11-inventory-csv": {
+      "title": "Inventory by CSV",
+      "description": "In Products → Inventory CSV download your current inventory or a form to fill in. Upload it to add incoming goods or correct the count, saying what goes to the office and what goes home.",
+      "ctaLabel": "Go to products"
+    },
     "2026-11-order-tracking": {
       "title": "Order tracking",
       "description": "Customers who paid in advance can now see where their order is: transit, customs, city. You update the status and send them the link on WhatsApp.",

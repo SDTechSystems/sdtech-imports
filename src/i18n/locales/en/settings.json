@@ -551,7 +551,8 @@
       "markOrderReceived": "Whole order arrived",
       "markSomeReceived_one": "Mark {{count}} product as received",
       "markSomeReceived_other": "Mark {{count}} products as received"
-    }
+    },
+    "csv": "CSV"
   },
   "stockOut": {
     "locked": {

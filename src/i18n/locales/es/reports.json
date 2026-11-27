@@ -176,5 +176,162 @@
       "amount": "Monto",
       "notes": "Notas"
     }
+  },
+  "analytics": {
+    "title": "Análisis de ventas",
+    "back": "Volver a reportes",
+    "loading": "Cargando ventas...",
+    "empty": "No hay ventas con estos filtros en el periodo elegido.",
+    "walkIn": "Sin cliente",
+    "unknownCustomer": "Cliente eliminado",
+    "byPayment": "Por método de pago",
+    "byCategory": "Por categoría",
+    "salesCount_one": "{{count}} venta",
+    "salesCount_other": "{{count}} ventas",
+    "unitsCount_one": "{{count}} unidad",
+    "unitsCount_other": "{{count}} unidades",
+    "showAll": "Ver los {{count}}",
+    "showLess": "Ver menos",
+    "presets": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "7d": "7 días",
+      "30d": "30 días",
+      "thisMonth": "Este mes",
+      "lastMonth": "Mes pasado",
+      "90d": "90 días",
+      "thisYear": "Este año",
+      "custom": "Fechas"
+    },
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta",
+      "more": "Filtros",
+      "remove": "Quitar filtro",
+      "clear": "Quitar todos",
+      "customer": "Cliente",
+      "allCustomers": "Todos los clientes",
+      "searchCustomer": "Buscar cliente...",
+      "product": "Producto",
+      "allProducts": "Todos los productos",
+      "searchProduct": "Buscar producto...",
+      "category": "Categoría",
+      "allCategories": "Todas las categorías",
+      "payment": "Método de pago",
+      "allPayments": "Todos los métodos",
+      "cashier": "Cajero",
+      "allCashiers": "Todos los cajeros",
+      "itemNote": "Con filtro de producto o categoría, los montos son solo de esos productos (sin el descuento general de la venta)."
+    },
+    "tabs": {
+      "summary": "Resumen",
+      "customers": "Clientes",
+      "products": "Productos",
+      "times": "Horarios",
+      "sales": "Ventas"
+    },
+    "kpi": {
+      "sales": "Ventas",
+      "profit": "Utilidad",
+      "count": "N.º de ventas",
+      "avgTicket": "Ticket promedio",
+      "units": "Unidades",
+      "customers": "Clientes",
+      "vsPrevious": "{{pct}} vs. periodo anterior",
+      "noPrevious": "Sin periodo anterior",
+      "margin": "Margen: {{pct}} %",
+      "credit": "Vendido fiado: {{amount}}"
+    },
+    "metric": {
+      "sales": "Ventas",
+      "profit": "Utilidad",
+      "count": "N.º ventas"
+    },
+    "gran": {
+      "auto": "Auto",
+      "day": "Día",
+      "week": "Semana",
+      "month": "Mes"
+    },
+    "chart": {
+      "sales": "Ventas en el tiempo",
+      "profit": "Utilidad en el tiempo",
+      "count": "Número de ventas en el tiempo",
+      "best_day": "Mejor día: {{label}} ({{value}})",
+      "best_week": "Mejor semana: la del {{label}} ({{value}})",
+      "best_month": "Mejor mes: {{label}} ({{value}})"
+    },
+    "customers": {
+      "title": "Compras por cliente",
+      "identified": "Clientes",
+      "repeat": "Recurrentes",
+      "share": "% de ventas",
+      "search": "Buscar cliente...",
+      "sortSales": "Monto",
+      "sortCount": "Frecuencia",
+      "sortAvg": "Ticket",
+      "sortRecent": "Reciente",
+      "includeWalkIn": "Incluir ventas sin cliente",
+      "none": "Ningún cliente coincide.",
+      "row_one": "{{count}} compra · última {{last}}",
+      "row_other": "{{count}} compras · última {{last}}",
+      "avg": "prom. {{amount}}",
+      "more": "y {{count}} más (usa la búsqueda o exporta el CSV)"
+    },
+    "detail": {
+      "since": "Primera compra {{first}} · última {{last}} (en el periodo)",
+      "timeline": "Compras en el tiempo",
+      "topProducts": "Lo que más compra",
+      "purchases": "Compras",
+      "filterBy": "Ver todo el análisis de este cliente"
+    },
+    "products": {
+      "title": "Productos vendidos ({{count}})",
+      "sortQty": "Unidades",
+      "sortRevenue": "Ventas",
+      "sortProfit": "Utilidad",
+      "row_one": "{{qty}} uds. en {{count}} venta",
+      "row_other": "{{qty}} uds. en {{count}} ventas",
+      "margin": "margen {{pct}} %",
+      "tapHint": "Toca un producto para filtrar todo el análisis por él."
+    },
+    "times": {
+      "weekday": "Por día de la semana",
+      "hour": "Por hora del día",
+      "bestDay": "Día más fuerte",
+      "bestHour": "Hora pico"
+    },
+    "sales": {
+      "title": "Ventas ({{count}})",
+      "total": "Total: {{amount}}",
+      "search": "Buscar por recibo, cliente o producto...",
+      "credit": "Fiado {{amount}}",
+      "profit": "Utilidad",
+      "more": "Ver más ({{count}} restantes)"
+    },
+    "csv": {
+      "customer": "Cliente",
+      "purchases": "Compras",
+      "total": "Total",
+      "avgTicket": "Ticket promedio",
+      "profit": "Utilidad",
+      "credit": "Fiado",
+      "units": "Unidades",
+      "firstPurchase": "Primera compra",
+      "lastPurchase": "Última compra",
+      "date": "Fecha",
+      "time": "Hora",
+      "receipt": "Recibo",
+      "payment": "Método de pago",
+      "products": "Productos",
+      "customersFile": "compras-por-cliente-{{from}}_{{to}}.csv",
+      "salesFile": "ventas-{{from}}_{{to}}.csv",
+      "done": "CSV descargado",
+      "failed": "No se pudo exportar el CSV"
+    }
+  },
+  "analyticsLink": {
+    "title": "Análisis detallado",
+    "desc": "Compras por cliente, ventas por fechas, productos, horarios y filtros"
   }
 }

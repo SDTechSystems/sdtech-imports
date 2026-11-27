@@ -1,4 +1,4 @@
-import { PackageCheck, PackageSearch, Plane, QrCode, type LucideIcon } from 'lucide-react';
+import { FileSpreadsheet, BarChart3, PackageCheck, PackageSearch, Plane, QrCode, type LucideIcon } from 'lucide-react';
 import { db } from './db';
 
 /**
@@ -23,6 +23,20 @@ export interface WhatsNewFeature {
 }
 
 export const FEATURES: WhatsNewFeature[] = [
+  {
+    id: '2026-11-sales-analytics',
+    icon: BarChart3,
+    iconColor: 'text-primary bg-primary/10',
+    publishedAt: '2026-11-27',
+    cta: { to: '/reports/analytics' },
+  },
+  {
+    id: '2026-11-inventory-csv',
+    icon: FileSpreadsheet,
+    iconColor: 'text-success bg-success/10',
+    publishedAt: '2026-11-27',
+    cta: { to: '/products' },
+  },
   {
     id: '2026-11-order-tracking',
     icon: PackageSearch,

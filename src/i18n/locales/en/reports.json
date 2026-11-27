@@ -176,5 +176,162 @@
       "amount": "Amount",
       "notes": "Notes"
     }
+  },
+  "analytics": {
+    "title": "Sales analysis",
+    "back": "Back to reports",
+    "loading": "Loading sales...",
+    "empty": "No sales match these filters in the selected period.",
+    "walkIn": "No customer",
+    "unknownCustomer": "Deleted customer",
+    "byPayment": "By payment method",
+    "byCategory": "By category",
+    "salesCount_one": "{{count}} sale",
+    "salesCount_other": "{{count}} sales",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "{{count}} units",
+    "showAll": "Show all {{count}}",
+    "showLess": "Show less",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "7d": "7 days",
+      "30d": "30 days",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "90d": "90 days",
+      "thisYear": "This year",
+      "custom": "Dates"
+    },
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "more": "Filters",
+      "remove": "Remove filter",
+      "clear": "Clear all",
+      "customer": "Customer",
+      "allCustomers": "All customers",
+      "searchCustomer": "Search customer...",
+      "product": "Product",
+      "allProducts": "All products",
+      "searchProduct": "Search product...",
+      "category": "Category",
+      "allCategories": "All categories",
+      "payment": "Payment method",
+      "allPayments": "All methods",
+      "cashier": "Cashier",
+      "allCashiers": "All cashiers",
+      "itemNote": "With a product or category filter, amounts include only those products (before the sale-wide discount)."
+    },
+    "tabs": {
+      "summary": "Summary",
+      "customers": "Customers",
+      "products": "Products",
+      "times": "Times",
+      "sales": "Sales"
+    },
+    "kpi": {
+      "sales": "Sales",
+      "profit": "Profit",
+      "count": "No. of sales",
+      "avgTicket": "Average ticket",
+      "units": "Units",
+      "customers": "Customers",
+      "vsPrevious": "{{pct}} vs. previous period",
+      "noPrevious": "No previous period",
+      "margin": "Margin: {{pct}}%",
+      "credit": "Sold on credit: {{amount}}"
+    },
+    "metric": {
+      "sales": "Sales",
+      "profit": "Profit",
+      "count": "No. sales"
+    },
+    "gran": {
+      "auto": "Auto",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "chart": {
+      "sales": "Sales over time",
+      "profit": "Profit over time",
+      "count": "Number of sales over time",
+      "best_day": "Best day: {{label}} ({{value}})",
+      "best_week": "Best week: starting {{label}} ({{value}})",
+      "best_month": "Best month: {{label}} ({{value}})"
+    },
+    "customers": {
+      "title": "Purchases by customer",
+      "identified": "Customers",
+      "repeat": "Returning",
+      "share": "% of sales",
+      "search": "Search customer...",
+      "sortSales": "Amount",
+      "sortCount": "Frequency",
+      "sortAvg": "Ticket",
+      "sortRecent": "Recent",
+      "includeWalkIn": "Include sales without customer",
+      "none": "No customer matches.",
+      "row_one": "{{count}} purchase · last {{last}}",
+      "row_other": "{{count}} purchases · last {{last}}",
+      "avg": "avg. {{amount}}",
+      "more": "and {{count}} more (use search or export the CSV)"
+    },
+    "detail": {
+      "since": "First purchase {{first}} · last {{last}} (in the period)",
+      "timeline": "Purchases over time",
+      "topProducts": "What they buy most",
+      "purchases": "Purchases",
+      "filterBy": "See the whole analysis for this customer"
+    },
+    "products": {
+      "title": "Products sold ({{count}})",
+      "sortQty": "Units",
+      "sortRevenue": "Sales",
+      "sortProfit": "Profit",
+      "row_one": "{{qty}} units in {{count}} sale",
+      "row_other": "{{qty}} units in {{count}} sales",
+      "margin": "margin {{pct}}%",
+      "tapHint": "Tap a product to filter the whole analysis by it."
+    },
+    "times": {
+      "weekday": "By day of the week",
+      "hour": "By hour of the day",
+      "bestDay": "Strongest day",
+      "bestHour": "Peak hour"
+    },
+    "sales": {
+      "title": "Sales ({{count}})",
+      "total": "Total: {{amount}}",
+      "search": "Search by receipt, customer or product...",
+      "credit": "Credit {{amount}}",
+      "profit": "Profit",
+      "more": "Show more ({{count}} left)"
+    },
+    "csv": {
+      "customer": "Customer",
+      "purchases": "Purchases",
+      "total": "Total",
+      "avgTicket": "Average ticket",
+      "profit": "Profit",
+      "credit": "Credit",
+      "units": "Units",
+      "firstPurchase": "First purchase",
+      "lastPurchase": "Last purchase",
+      "date": "Date",
+      "time": "Time",
+      "receipt": "Receipt",
+      "payment": "Payment method",
+      "products": "Products",
+      "customersFile": "purchases-by-customer-{{from}}_{{to}}.csv",
+      "salesFile": "sales-{{from}}_{{to}}.csv",
+      "done": "CSV downloaded",
+      "failed": "Could not export the CSV"
+    }
+  },
+  "analyticsLink": {
+    "title": "Detailed analysis",
+    "desc": "Purchases by customer, sales by date, products, times and filters"
   }
 }
