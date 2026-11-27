@@ -50,7 +50,6 @@ interface CartDraft {
   customerId?: number;
   tableNumber: string;
   remarks: string;
-  fromHome: boolean;
 }
 
 function loadCartDraft(): Partial<CartDraft> {
@@ -96,7 +95,6 @@ export default function Kasir() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [shippingFee, setShippingFee] = useState(''); // envío cobrado al cliente
   const [useDebt, setUseDebt] = useState(false);
-  const [fromHome, setFromHome] = useState(() => initialDraft.fromHome ?? false);
   const [isQuickAdding, setIsQuickAdding] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
@@ -155,7 +153,6 @@ export default function Kasir() {
     setPaymentAmount('');
     setShippingFee('');
     setUseDebt(false);
-    setFromHome(false);
     setCustomerName('');
     setCustomerId(undefined);
     setTableNumber('');
@@ -447,15 +444,6 @@ export default function Kasir() {
 
   // === Checkout ===
 
-  /** Descuenta del inventario de casa (parte de `stock`) lo que se vendió desde la casa. */
-  const deductHomeStock = async () => {
-    for (const item of cart) {
-      if (!isStockManaged(item.product)) continue;
-      const product = await db.products.get(item.product.id!);
-      const home = product?.stockHome ?? 0;
-      if (home > 0) await db.products.update(item.product.id!, { stockHome: Math.max(0, home - item.qty) });
-    }
-  };
 
   const handleCheckout = async () => {
     if (useDebt) {
@@ -497,7 +485,6 @@ export default function Kasir() {
         remarks: remarks.trim() || undefined,
         closedAt: new Date(),
         debtAmount,
-        soldFromHome: fromHome || undefined,
         shippingFee: shippingAmount || undefined,
         verifyCode: (await db.transactions.get(editingTxId))?.verifyCode || generateVerifyCode(),
       });
@@ -552,7 +539,6 @@ export default function Kasir() {
         }
       }
 
-      if (fromHome) await deductHomeStock();
 
       const updatedTx = await db.transactions.get(editingTxId);
       if (updatedTx) {
@@ -585,7 +571,6 @@ export default function Kasir() {
         remarks: remarks.trim() || undefined,
         createdBy: currentUser?.id,
         debtAmount,
-        soldFromHome: fromHome || undefined,
         shippingFee: shippingAmount || undefined,
         verifyCode: generateVerifyCode(),
       };
@@ -624,7 +609,6 @@ export default function Kasir() {
         if (!isStockManaged(item.product)) continue;
         await db.products.update(item.product.id!, { stock: item.product.stock - item.qty, updatedAt: new Date() });
       }
-      if (fromHome) await deductHomeStock();
 
       const trackingCode = await syncSaleTracking({ ...txData, id: txId as number }, itemRecords, storeSettings);
       void registerReceipt(toPublicReceipt({ ...txData, id: txId as number }, itemRecords, storeSettings?.storeName || 'SD Tech Imports', storeSettings?.phone, trackingCode));
@@ -689,12 +673,12 @@ export default function Kasir() {
         localStorage.removeItem(CART_DRAFT_KEY);
         return;
       }
-      const draft: CartDraft = { cart, editingTxId, txDiscountType, txDiscountValue, customerName, customerId, tableNumber, remarks, fromHome };
+      const draft: CartDraft = { cart, editingTxId, txDiscountType, txDiscountValue, customerName, customerId, tableNumber, remarks };
       localStorage.setItem(CART_DRAFT_KEY, JSON.stringify(draft));
     } catch {
       // Storage full or unavailable: the cart still works for this visit.
     }
-  }, [cart, editingTxId, txDiscountType, txDiscountValue, customerName, customerId, tableNumber, remarks, fromHome]);
+  }, [cart, editingTxId, txDiscountType, txDiscountValue, customerName, customerId, tableNumber, remarks]);
 
   // Keep products in a restored cart in sync with the catalog (price, stock,
   // photo) and drop products that were deleted meanwhile.
@@ -1375,16 +1359,6 @@ export default function Kasir() {
                     setIsQuickAdding(false);
                   }}
                 />
-              </div>
-            )}
-
-            {cart.some(c => isStockManaged(c.product) && (c.product.stockHome ?? 0) > 0) && (
-              <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-                <div>
-                  <p className="text-sm font-semibold">{t('cashier.checkout.fromHomeLabel')}</p>
-                  <p className="text-[10px] text-muted-foreground">{t('cashier.checkout.fromHomeDesc')}</p>
-                </div>
-                <Switch checked={fromHome} onCheckedChange={setFromHome} />
               </div>
             )}
 

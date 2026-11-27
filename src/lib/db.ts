@@ -67,7 +67,7 @@ export interface Product {
   price: number; // harga jual
   hpp: number; // harga pokok penjualan
   stock: number; // existencia total (oficina + casa)
-  stockHome?: number; // parte de `stock` guardada en casa; la oficina tiene stock - stockHome
+  stockHome?: number; // obsoleto: todo el inventario está en un solo lugar (se conserva por datos antiguos)
   trackStock?: boolean; // true/undefined = stok dikelola (default lama), false = stok tidak dikelola (selalu tersedia)
   preorder?: boolean; // se vende por encargo: se cobra aunque no haya existencias; el stock negativo son unidades por entregar
   unit: string; // satuan: pcs, kg, liter, dll
@@ -140,7 +140,7 @@ export interface StockIn {
   shippingCost?: number; // envío total en pesos, escrito a mano
   tracking?: string; // número de guía / pedido de Amazon
   orderId?: string; // compras del mismo pedido (comparten tasa, envío y guía)
-  toHome?: boolean; // al recibirlo entra al inventario de casa
+  toHome?: boolean; // obsoleto (se conserva por datos antiguos)
   receivedAt?: Date | null;
   createdBy?: number; // userId
   updatedAt?: Date;
@@ -222,7 +222,7 @@ export interface Transaction {
   closedAt?: Date;
   createdBy?: number; // userId — kasir pembuat transaksi
   debtAmount?: number; // snapshot hutang awal; 0/undefined = lunas saat checkout
-  soldFromHome?: boolean; // la mercancía salió del inventario de casa
+  soldFromHome?: boolean; // obsoleto (se conserva por datos antiguos)
   shippingFee?: number; // envío cobrado al cliente (no es ganancia)
   verifyCode?: string; // código del QR para verificar el recibo
   updatedAt?: Date;

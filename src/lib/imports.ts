@@ -124,7 +124,6 @@ export async function receiveStockIn(stockInId: number, receivedAt = new Date())
     await db.products.update(product.id!, {
       stock: newStock,
       hpp: newHpp,
-      ...(si.toHome ? { stockHome: (product.stockHome ?? 0) + si.quantity } : {}),
       updatedAt: receivedAt,
     });
     await db.stockIns.update(stockInId, { status: 'received', receivedAt });

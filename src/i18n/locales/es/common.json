@@ -78,7 +78,7 @@
     },
     "2026-11-inventory-csv": {
       "title": "Inventario por CSV",
-      "description": "En Productos → Inventario CSV descarga tu inventario actual o un formulario para llenarlo. Súbelo para sumar una entrada de mercancía o corregir el conteo, indicando qué va para la oficina y qué para la casa.",
+      "description": "En Productos → Inventario CSV descarga tu inventario actual o un formulario para llenarlo. Súbelo para sumar una entrada de mercancía o corregir el conteo.",
       "ctaLabel": "Ir a productos"
     },
     "2026-11-order-tracking": {

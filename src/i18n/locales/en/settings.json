@@ -474,8 +474,6 @@
       "notesPlaceholder": "Optional",
       "total": "Total: $ {{amount}}",
       "save": "Save purchase",
-      "toHomeLabel": "Keep at home",
-      "toHomeDesc": "These units go to the stock you keep at home",
       "supplierLabelOptional": "Supplier"
     },
     "toast": {
@@ -886,8 +884,6 @@
       "remainingDebtHint": "Customer must be selected from the list",
       "changeLabel": "Change",
       "confirmButton": "Confirm Transaction",
-      "fromHomeLabel": "Taken from home stock",
-      "fromHomeDesc": "Deduct these units from the stock you keep at home",
       "shippingLabel": "Delivery to customer (optional)",
       "shippingHint": "Enter it based on distance. Added to the total but not counted as profit."
     },

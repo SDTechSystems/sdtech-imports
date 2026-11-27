@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
-  AlertTriangle, ArrowRight, Building2, CheckCircle2, ClipboardList, Download, FileSpreadsheet, Home as HomeIcon,
-  Loader2, PackagePlus, Upload, XCircle,
+  AlertTriangle, ArrowRight, CheckCircle2, ClipboardList, Download, FileSpreadsheet, Loader2, Package, PackagePlus,
+  Upload, XCircle,
 } from 'lucide-react';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/use-auth';
@@ -34,7 +34,7 @@ interface Props {
 
 /**
  * Exporta el inventario a CSV y carga un CSV/Excel para sumar una entrada
- * de mercancía o corregir el conteo, separando oficina y casa.
+ * de mercancía o corregir el conteo.
  */
 export default function InventoryCsvDialog({ open, onOpenChange, defaultMode = 'entry' }: Props) {
   const { t } = useTranslation('products');
@@ -129,7 +129,6 @@ export default function InventoryCsvDialog({ open, onOpenChange, defaultMode = '
         supplierId: Number(supplierId) || 0,
         userId: currentUser?.id,
         note,
-        homeLabel: t('inventoryCsv.home'),
       });
       toast.success(t(mode === 'entry' ? 'inventoryCsv.entrySaved' : 'inventoryCsv.countSaved', { count: changed }));
       close(false);
@@ -315,18 +314,14 @@ export default function InventoryCsvDialog({ open, onOpenChange, defaultMode = '
                             ))}
                           </div>
                         ) : (
-                          <div className="mt-1.5 grid grid-cols-2 gap-2 text-xs">
-                            {([['office', Building2, r.currentOffice, r.newOffice], ['home', HomeIcon, r.currentHome, r.newHome]] as const).map(
-                              ([key, Icon, from, to]) => (
-                                <div key={key} className={cn('flex items-center gap-1 rounded-md px-2 py-1', from !== to ? 'bg-primary/5' : 'bg-muted/40 text-muted-foreground')}>
-                                  <Icon className="w-3 h-3 shrink-0" />
-                                  <span className="text-[10px]">{t(`inventoryCsv.${key}`)}</span>
-                                  <span className="ml-auto font-mono">{qty(from)}</span>
-                                  <ArrowRight className="w-3 h-3 shrink-0" />
-                                  <span className={cn('font-mono font-semibold', to > from && 'text-success', to < from && 'text-destructive')}>{qty(to)}</span>
-                                </div>
-                              ),
-                            )}
+                          <div className={cn('mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-xs', r.newStock !== r.currentStock ? 'bg-primary/5' : 'bg-muted/40 text-muted-foreground')}>
+                            <Package className="w-3 h-3 shrink-0" />
+                            <span className="text-[10px]">{t('inventoryCsv.stockLabel')}</span>
+                            <span className="ml-auto font-mono">{qty(r.currentStock)}</span>
+                            <ArrowRight className="w-3 h-3 shrink-0" />
+                            <span className={cn('font-mono font-semibold', r.newStock > r.currentStock && 'text-success', r.newStock < r.currentStock && 'text-destructive')}>
+                              {qty(r.newStock)} {r.unit}
+                            </span>
                           </div>
                         )}
                       </div>

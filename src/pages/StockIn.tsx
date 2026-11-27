@@ -64,7 +64,6 @@ export default function StockInPage() {
   const [inTransit, setInTransit] = useState(true);
   const [tracking, setTracking] = useState('');
   const [notes, setNotes] = useState('');
-  const [toHome, setToHome] = useState(false);
   const [filterSupplier, setFilterSupplier] = useState('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
     searchParams.get('estado') === 'transito' ? 'in_transit' : 'all',
@@ -115,7 +114,7 @@ export default function StockInPage() {
 
   const openAdd = async () => {
     setLines([emptyLine()]); setSupplierId(''); setShipping('');
-    setNotes(''); setTracking(''); setToHome(false); setCurrency('USD'); setOrigin('US'); setInTransit(true);
+    setNotes(''); setTracking(''); setCurrency('USD'); setOrigin('US'); setInTransit(true);
     setRate(storeSettings?.lastExchangeRate ? String(storeSettings.lastExchangeRate) : '');
     setDialogOpen(true);
     // Se propone la tasa del día; si no hay conexión queda la última que usaste.
@@ -165,7 +164,6 @@ export default function StockInPage() {
         shippingCost: cost.shippingCop || undefined,
         tracking: tracking.trim() || undefined,
         orderId,
-        toHome,
         receivedAt: null,
       }) as number);
     }
@@ -482,13 +480,6 @@ export default function StockInPage() {
               <Switch checked={inTransit} onCheckedChange={setInTransit} />
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-              <div>
-                <p className="text-sm font-semibold">{t('stockIn.dialog.toHomeLabel')}</p>
-                <p className="text-[10px] text-muted-foreground">{t('stockIn.dialog.toHomeDesc')}</p>
-              </div>
-              <Switch checked={toHome} onCheckedChange={setToHome} />
-            </div>
             <div className="space-y-1.5"><Label>{t('stockIn.dialog.notesLabel')}</Label><Input value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('stockIn.dialog.notesPlaceholder')} className="h-11" /></div>
             <Button className="w-full h-12 text-base font-semibold" onClick={handleSave}>{t('stockIn.dialog.save')}</Button>
           </div>

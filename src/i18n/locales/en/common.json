@@ -78,7 +78,7 @@
     },
     "2026-11-inventory-csv": {
       "title": "Inventory by CSV",
-      "description": "In Products → Inventory CSV download your current inventory or a form to fill in. Upload it to add incoming goods or correct the count, saying what goes to the office and what goes home.",
+      "description": "In Products → Inventory CSV download your current inventory or a form to fill in. Upload it to add incoming goods or correct the count.",
       "ctaLabel": "Go to products"
     },
     "2026-11-order-tracking": {
